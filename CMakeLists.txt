@@ -3,4 +3,4 @@ project(SASNN)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(SASNN main.cpp)
+add_executable(SASNN src/main.cpp src/Matrix2D.cpp include/Matrix2D.h include/stdafx.h)
