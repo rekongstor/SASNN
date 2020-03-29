@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "../../include/Core/Matrix2D.h"
 #include "memory.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdexcept>
 
 typedef char s8;
 typedef unsigned char u8;
