@@ -2,31 +2,50 @@
 #include "memory.h"
 
 Matrix2D::Matrix2D(size_t rows, size_t cols) : rows(rows),
-                                               cols(cols) {
+                                               cols(cols),
+                                               transposed(false) {
     data.resize(rows * cols);
 }
 
 f32 &Matrix2D::operator()(size_t row, size_t col) {
+    if (!transposed) {
 #if (DEBUG_LEVEL > 0)
-    if (row > rows || col > cols)
+        if (row >= rows || col >= cols)
+            throw std::out_of_range("Matrix2D is out of range");
+#endif
+        return data[row * cols + col];
+    }
+#if (DEBUG_LEVEL > 0)
+    if (col >= rows || row >= cols)
         throw std::out_of_range("Matrix2D is out of range");
 #endif
-    return data[row * cols + col];
+    return data[col * cols + row];
 }
 
 const f32 &Matrix2D::operator()(size_t row, size_t col) const {
+    if (!transposed) {
 #if (DEBUG_LEVEL > 0)
-    if (row > rows || col > cols)
+        if (row >= rows || col >= cols)
+            throw std::out_of_range("Matrix2D is out of range");
+#endif
+        return data[row * cols + col];
+    }
+#if (DEBUG_LEVEL > 0)
+    if (col >= rows || row >= cols)
         throw std::out_of_range("Matrix2D is out of range");
 #endif
-    return data[row * cols + col];
+    return data[col * cols + row];
 }
 
 size_t Matrix2D::getRows() const {
+    if (transposed)
+        return cols;
     return rows;
 }
 
 size_t Matrix2D::getCols() const {
+    if (transposed)
+        return rows;
     return cols;
 }
 
@@ -62,10 +81,10 @@ void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*fu
 
 void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32)) {
     for (size_t j = 0; j < cols; ++j) {
-        f32 tmp = left(0,j);
+        f32 tmp = left(0, j);
         for (size_t i = 1; i < left.rows; ++i)
             tmp = functor(tmp, left(i, j));
-        (*this)(0,j) = tmp;
+        (*this)(0, j) = tmp;
     }
 }
 
@@ -87,5 +106,9 @@ void Matrix2D::MergeAllOperator(const Matrix2D &left, f32 (*functor)(const f32, 
         for (size_t j = 0; j < left.cols; ++j)
             tmp = functor(tmp, left(i, j));
 
-    (*this)(0,0) = tmp;
+    (*this)(0, 0) = tmp;
+}
+
+void Matrix2D::transpose() {
+    transposed = !transposed;
 }

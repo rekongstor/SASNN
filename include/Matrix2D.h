@@ -6,6 +6,7 @@
 class Matrix2D {
     size_t rows;
     size_t cols;
+    bool transposed;
     std::vector<f32> data;
 public:
     Matrix2D(size_t rows, size_t cols);
@@ -15,6 +16,7 @@ public:
     [[nodiscard]] size_t getRows() const;
     [[nodiscard]] size_t getCols() const;
     void copyRow(size_t row, const f32 *data);
+    void transpose();
 
     /**
      * Performs unary functor on the corresponding cell
