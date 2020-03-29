@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "../Core/Random.h"
-#include "Abstract/LayerDynamic.h"
+#include "../../include/Core/Random.h"
+#include "../../include/Layer/Abstract/LayerDynamic.h"
 
 class LayerWeights : public LayerDynamic {
 private:

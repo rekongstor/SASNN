@@ -20,6 +20,7 @@ public:
     void copyRow(size_t row, const f32 *data);
     void transpose();
     void Clean();
+    void Fill(f32 value);
 
     /**
      * Performs unary functor on the corresponding cell

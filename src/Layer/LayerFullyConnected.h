@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Abstract/LayerDynamic.h"
+#include "../../include/Layer/Abstract/LayerDynamic.h"
 
 class LayerFullyConnected : public LayerDynamic {
     Layer& left;

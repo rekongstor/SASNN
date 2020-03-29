@@ -172,3 +172,9 @@ void Matrix2D::Clean() {
             (*this)(i, j) = 0.f;
 }
 
+void Matrix2D::Fill(f32 value) {
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            (*this)(i, j) = value;
+}
+

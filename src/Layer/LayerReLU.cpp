@@ -7,10 +7,12 @@ void LayerReLU::followProp() {
 }
 
 void LayerReLU::backProp() {
-    Matrix2D &l = *left.getGrad();
-    l.EachCellOperator(data,[](const f32 left) -> f32 {
-        return left <= 0.f ? 0.f : 1.f;
-    }, &grad);
+    if (left.getGrad() != nullptr) {
+        Matrix2D &g = *left.getGrad();
+        g.EachCellOperator(data, [](const f32 left) -> f32 {
+            return left <= 0.f ? 0.f : 1.f;
+        }, &grad);
+    }
 }
 
 LayerReLU::LayerReLU(Layer &left) : LayerDynamic(left.getData().getRows(), left.getData().getCols()),

@@ -1,4 +1,4 @@
-#include "../../include/Layer/LayerWeights.h"
+#include "LayerWeights.h"
 
 void LayerWeights::followProp() {
 

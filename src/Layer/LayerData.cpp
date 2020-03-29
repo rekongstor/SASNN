@@ -1,4 +1,4 @@
-#include "../../include/Layer/LayerData.h"
+#include "LayerData.h"
 
 LayerData::LayerData(const Matrix2D &data) : Layer(data) {
 
