@@ -1,17 +1,12 @@
 #pragma once
 
 
-#include "Layer.h"
 #include "../Core/Random.h"
+#include "Abstract/LayerDynamic.h"
 
-class LayerWeights : public Layer{
-protected:
-    const Matrix2D &getData() override;
+class LayerWeights : public LayerDynamic {
 private:
-    Matrix2D data;
-    Matrix2D grad;
-    void backProp(Matrix2D &grad) override;
-    void clearGrad() override;
+    void backProp() override;
     void followProp() override;
 public:
     LayerWeights(size_t rows, size_t cols, bool random = false);

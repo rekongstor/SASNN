@@ -1,6 +1,6 @@
 #include "../../include/Layer/LayerData.h"
 
-LayerData::LayerData(const Matrix2D &data) : data(data) {
+LayerData::LayerData(const Matrix2D &data) : Layer(data) {
 
 }
 
@@ -8,14 +8,10 @@ void LayerData::followProp() {
 
 }
 
-void LayerData::backProp(Matrix2D &grad) {
+void LayerData::backProp() {
 
 }
 
 void LayerData::clearGrad() {
 
-}
-
-const Matrix2D &LayerData::getData() {
-    return data;
 }

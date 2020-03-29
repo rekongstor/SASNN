@@ -4,16 +4,11 @@ void LayerWeights::followProp() {
 
 }
 
-void LayerWeights::backProp(Matrix2D &grad) {
+void LayerWeights::backProp() {
 
 }
 
-void LayerWeights::clearGrad() {
-    grad.Clean();
-}
-
-LayerWeights::LayerWeights(size_t rows, size_t cols, bool random) : data(rows, cols),
-                                                                    grad(rows, cols, true) {
+LayerWeights::LayerWeights(size_t rows, size_t cols, bool random) : LayerDynamic(rows, cols) {
     if (random) {
         RandomUniform randomUniform(-.5f, .5f);
         Random *rng = &randomUniform;
@@ -24,8 +19,7 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, bool random) : data(rows, c
         data.Clean();
 }
 
-LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : data(rows, cols),
-                                                                          grad(rows, cols, true) {
+LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : LayerDynamic(rows, cols) {
     RandomGaussian randomGaussian = RandomGaussian(
             0.f,
             sqrtf(2.f / xavier_inputs));
@@ -34,8 +28,4 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : data(r
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             data(i, j) = rng->Next();
-}
-
-const Matrix2D &LayerWeights::getData() {
-    return data;
 }

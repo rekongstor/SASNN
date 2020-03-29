@@ -25,46 +25,46 @@ public:
      * Performs unary functor on the corresponding cell
      * @param left : [rows x cols]
      */
-    void CellOperator(const Matrix2D &left, f32 (*functor)(f32));
+    void EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const Matrix2D *grad = nullptr);
     /**
      * Performs binary functor on the corresponding cell
      * @param left : [rows x cols]
      * @param right : [rows x cols]
      */
-    void CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32));
+    void EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Performs binary functor on the each row
      * @param left [rows x cols]
      * @param right [1 x cols]
      */
-    void RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32));
+    void RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Performs binary functor on the each column
      * @param left [rows x cols]
      * @param right [rows x 1]
      */
-    void ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32));
+    void ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Performs binary functor on the each cell
      * @param left [rows x cols]
      * @param right [1 x 1]
      */
-    void SingleCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32));
+    void CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Merges all rows into one according to the binary functor
      * @param left [ANY x cols]
      */
-    void MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32));
+    void MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Merges all columns into one according to the binary functor
      * @param left [rows x ANY]
      */
-    void MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32));
+    void MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
-     * Merges everything into one according to the binary functor (increasing columns for each row)
+     * Merges cells into one according to the binary functor (increasing columns for each row)
      * @param left [ANY x ANY]
      */
-    void MergeAllOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32));
+    void MergeCellOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Performs matrix multiplication
      * @param left [rows x ANY]

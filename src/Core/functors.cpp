@@ -1,6 +1,5 @@
-
+#include "../../include/stdafx.h"
 #include <cmath>
-#include "../../include/Core/functors.h"
 
 f32 sum(f32 left, f32 right) {
     return left + right;
