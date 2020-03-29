@@ -4,22 +4,18 @@
 #include "Layer/LayerReLU.h"
 #include "Layer/LayerData.h"
 #include "Layer/LayerFullyConnected.h"
-
+#include "Layer/LayerLeakyReLU.h"
 
 int main() {
 
-    Layer *weights = new LayerWeights(1, 4, static_cast<f32>(2));
+    Layer *weights = new LayerWeights(2, 4, static_cast<f32>(2));
 
-    Matrix2D a(4, 2);
-    for (size_t i = 0; i < a.getRows(); ++i)
-        for (size_t j = 0; j < a.getCols(); ++j)
-            a(i,j) = i * a.getCols() + j;
-    Layer *data = new LayerData(a);
+    Matrix2D d(0.01f);
+    Layer *leak = new LayerData(d);
+    Layer *pLeakyReLu = new LayerLeakyReLU(*weights, *leak);
+    pLeakyReLu->getGrad()->Fill((1.f));
+    pLeakyReLu->followProp();
+    pLeakyReLu->backProp();
 
-
-    Layer *mul = new LayerFullyConnected(*weights, *data);
-    mul->getGrad()->Fill(1.f);
-    mul->followProp();
-    mul->backProp();
     return 0;
 }
