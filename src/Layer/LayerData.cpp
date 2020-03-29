@@ -15,3 +15,7 @@ void LayerData::backProp(Matrix2D &grad) {
 void LayerData::clearGrad() {
 
 }
+
+const Matrix2D &LayerData::getData() {
+    return data;
+}

@@ -1,4 +1,4 @@
-#include "Random.h"
+#include "../../include/Core/Random.h"
 #include <ctime>
 
 Random::Random(u64 seed) : engine(seed) {

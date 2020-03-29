@@ -1,7 +1,7 @@
 #pragma once
 
 #include <random>
-#include "../../include/stdafx.h"
+#include "../stdafx.h"
 
 class Random {
 protected:

@@ -15,7 +15,7 @@ void LayerWeights::clearGrad() {
 LayerWeights::LayerWeights(size_t rows, size_t cols, bool random) : data(rows, cols),
                                                                     grad(rows, cols, true) {
     if (random) {
-        RandomUniform randomUniform;
+        RandomUniform randomUniform(-.5f, .5f);
         Random *rng = &randomUniform;
         for (size_t i = 0; i < rows; ++i)
             for (size_t j = 0; j < cols; ++j)
@@ -24,14 +24,18 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, bool random) : data(rows, c
         data.Clean();
 }
 
-LayerWeights::LayerWeights(size_t rows, size_t cols, size_t xavier_inputs) : data(rows, cols),
-                                                                             grad(rows, cols, true) {
+LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : data(rows, cols),
+                                                                          grad(rows, cols, true) {
     RandomGaussian randomGaussian = RandomGaussian(
             0.f,
-            sqrtf(2.f / static_cast<f32>(xavier_inputs)));
+            sqrtf(2.f / xavier_inputs));
     Random *rng = &randomGaussian;
 
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             data(i, j) = rng->Next();
+}
+
+const Matrix2D &LayerWeights::getData() {
+    return data;
 }
