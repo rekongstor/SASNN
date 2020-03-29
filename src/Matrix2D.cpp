@@ -1,9 +1,10 @@
 #include "../include/Matrix2D.h"
 #include "memory.h"
 
-Matrix2D::Matrix2D(size_t rows, size_t cols) : rows(rows),
-                                               cols(cols),
-                                               transposed(false) {
+Matrix2D::Matrix2D(size_t rows, size_t cols, bool incremental) : rows(rows),
+                                                                 cols(cols),
+                                                                 transposed(false),
+                                                                 incremental(incremental) {
     data.resize(rows * cols);
 }
 
@@ -58,25 +59,37 @@ void Matrix2D::copyRow(size_t row, const f32 *data) {
 void Matrix2D::CellOperator(const Matrix2D &left, f32 (*functor)(f32)) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
-            (*this)(i, j) = functor(left(i, j));
+            if (incremental)
+                (*this)(i, j) += functor(left(i, j));
+            else
+                (*this)(i, j) = functor(left(i, j));
 }
 
 void Matrix2D::CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32)) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
-            (*this)(i, j) = functor(left(i, j), right(i, j));
+            if (incremental)
+                (*this)(i, j) += functor(left(i, j), right(i, j));
+            else
+                (*this)(i, j) = functor(left(i, j), right(i, j));
 }
 
 void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32)) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
-            (*this)(i, j) = functor(left(i, j), right(0, j));
+            if (incremental)
+                (*this)(i, j) += functor(left(i, j), right(0, j));
+            else
+                (*this)(i, j) = functor(left(i, j), right(0, j));
 }
 
 void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32)) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
-            (*this)(i, j) = functor(left(i, j), right(i, 0));
+            if (incremental)
+                (*this)(i, j) += functor(left(i, j), right(i, 0));
+            else
+                (*this)(i, j) = functor(left(i, j), right(i, 0));
 }
 
 void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32)) {
@@ -84,7 +97,10 @@ void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, 
         f32 tmp = left(0, j);
         for (size_t i = 1; i < left.rows; ++i)
             tmp = functor(tmp, left(i, j));
-        (*this)(0, j) = tmp;
+        if (incremental)
+            (*this)(0, j) += tmp;
+        else
+            (*this)(0, j) = tmp;
     }
 }
 
@@ -93,7 +109,10 @@ void Matrix2D::MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, 
         f32 tmp = left(i, 0);
         for (size_t j = 1; j < left.cols; ++j)
             tmp = functor(tmp, left(i, j));
-        (*this)(i, 0) = tmp;
+        if (incremental)
+            (*this)(i, 0) += tmp;
+        else
+            (*this)(i, 0) = tmp;
     }
 }
 
@@ -106,9 +125,18 @@ void Matrix2D::MergeAllOperator(const Matrix2D &left, f32 (*functor)(const f32, 
         for (size_t j = 0; j < left.cols; ++j)
             tmp = functor(tmp, left(i, j));
 
-    (*this)(0, 0) = tmp;
+    if (incremental)
+        (*this)(0, 0) += tmp;
+    else
+        (*this)(0, 0) = tmp;
 }
 
 void Matrix2D::transpose() {
     transposed = !transposed;
+}
+
+void Matrix2D::Clean() {
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            (*this)(i, j) = 0.f;
 }

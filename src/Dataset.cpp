@@ -15,7 +15,7 @@ Dataset::Dataset(u32 inputs, u32 outputs, const f32 *trainInputs_data, const f32
 
 void Dataset::CopyData(std::vector<Matrix2D> &dst, const f32 *src, u32 size, u32 samples) {
     for (u32 s = 0; s < samples; ++s) {
-        auto &Sample = dst.emplace_back(std::move(Matrix2D(batchSize, size)));
+        auto &Sample = dst.emplace_back(std::move(Matrix2D(batchSize, size, false)));
         for (size_t i = 0; i < batchSize; ++i)
             Sample.copyRow(i, src + i * size + s * batchSize * size);
     }
