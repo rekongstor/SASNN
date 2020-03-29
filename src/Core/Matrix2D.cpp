@@ -9,6 +9,13 @@ Matrix2D::Matrix2D(size_t rows, size_t cols, bool incremental) : rows(rows),
     data.resize(rows * cols);
 }
 
+Matrix2D::Matrix2D(f32 value) : rows(1),
+                                cols(1),
+                                transposed(false),
+                                incremental(false) {
+    data.assign({value});
+}
+
 f32 &Matrix2D::operator()(size_t row, size_t col) {
     if (!transposed) {
 #if (DEBUG_LEVEL > 0)
@@ -93,6 +100,16 @@ void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*fu
                 (*this)(i, j) = functor(left(i, j), right(i, 0));
 }
 
+void Matrix2D::SingleCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32)) {
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            if (incremental)
+                (*this)(i, j) += functor(left(i, j), right(0, 0));
+            else
+                (*this)(i, j) = functor(left(i, j), right(0, 0));
+}
+
+
 void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32)) {
     for (size_t j = 0; j < cols; ++j) {
         f32 tmp = left(0, j);
@@ -133,17 +150,16 @@ void Matrix2D::MergeAllOperator(const Matrix2D &left, f32 (*functor)(const f32, 
 }
 
 void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
-for (size_t i = 0; i < left.getRows(); ++i)
-    for (size_t j = 0; j < right.getCols(); ++j)
-    {
-        f32 tmp = 0.f;
-        for (size_t k = 0; k < left.getCols(); ++k)
-            tmp += left(i,k) * right(k,j);
-        if (incremental)
-            (*this)(i,j) += tmp;
-        else
-            (*this)(i,j) = tmp;
-    }
+    for (size_t i = 0; i < left.getRows(); ++i)
+        for (size_t j = 0; j < right.getCols(); ++j) {
+            f32 tmp = 0.f;
+            for (size_t k = 0; k < left.getCols(); ++k)
+                tmp += left(i, k) * right(k, j);
+            if (incremental)
+                (*this)(i, j) += tmp;
+            else
+                (*this)(i, j) = tmp;
+        }
 }
 
 void Matrix2D::transpose() {
@@ -155,3 +171,4 @@ void Matrix2D::Clean() {
         for (size_t j = 0; j < cols; ++j)
             (*this)(i, j) = 0.f;
 }
+
