@@ -1,4 +1,4 @@
-#include "../include/Matrix2D.h"
+#include "../../include/Core/Matrix2D.h"
 #include "memory.h"
 
 Matrix2D::Matrix2D(size_t rows, size_t cols, bool incremental) : rows(rows),
@@ -95,7 +95,7 @@ void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*fu
 void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32)) {
     for (size_t j = 0; j < cols; ++j) {
         f32 tmp = left(0, j);
-        for (size_t i = 1; i < left.rows; ++i)
+        for (size_t i = 1; i < left.getRows(); ++i)
             tmp = functor(tmp, left(i, j));
         if (incremental)
             (*this)(0, j) += tmp;
@@ -107,7 +107,7 @@ void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, 
 void Matrix2D::MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32)) {
     for (size_t i = 0; i < rows; ++i) {
         f32 tmp = left(i, 0);
-        for (size_t j = 1; j < left.cols; ++j)
+        for (size_t j = 1; j < left.getCols(); ++j)
             tmp = functor(tmp, left(i, j));
         if (incremental)
             (*this)(i, 0) += tmp;
@@ -118,17 +118,31 @@ void Matrix2D::MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, 
 
 void Matrix2D::MergeAllOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32)) {
     f32 tmp = left(0, 0);
-    for (size_t j = 1; j < left.cols; ++j)
+    for (size_t j = 1; j < left.getCols(); ++j)
         tmp = functor(tmp, left(0, j));
 
-    for (size_t i = 1; i < left.rows; ++i)
-        for (size_t j = 0; j < left.cols; ++j)
+    for (size_t i = 1; i < left.getRows(); ++i)
+        for (size_t j = 0; j < left.getCols(); ++j)
             tmp = functor(tmp, left(i, j));
 
     if (incremental)
         (*this)(0, 0) += tmp;
     else
         (*this)(0, 0) = tmp;
+}
+
+void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
+for (size_t i = 0; i < left.getRows(); ++i)
+    for (size_t j = 0; j < right.getCols(); ++j)
+    {
+        f32 tmp = 0.f;
+        for (size_t k = 0; k < left.getCols(); ++k)
+            tmp += left(i,k) * right(k,j);
+        if (incremental)
+            (*this)(i,j) += tmp;
+        else
+            (*this)(i,j) = tmp;
+    }
 }
 
 void Matrix2D::transpose() {

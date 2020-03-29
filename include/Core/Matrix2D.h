@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "stdafx.h"
+#include "../stdafx.h"
 
 class Matrix2D {
     size_t rows;
@@ -58,5 +58,11 @@ public:
      * @param left [ANY x ANY]
      */
     void MergeAllOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32));
+    /**
+     * Performs matrix multiplication
+     * @param left [rows x ANY]
+     * @param right [ANY x cols]
+     */
+    void MultiplyOperator(const Matrix2D &left, const Matrix2D &right);
 };
 

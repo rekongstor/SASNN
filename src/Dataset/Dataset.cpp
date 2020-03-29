@@ -1,4 +1,4 @@
-#include "../include/Dataset.h"
+#include "../../include/Dataset/Dataset.h"
 
 Dataset::Dataset(u32 inputs, u32 outputs, const f32 *trainInputs_data, const f32 *trainOutputs_data, const f32 *testInputs_data, const f32 *testOutputs_data, size_t batchSize,
                  size_t trainBatches, size_t testBatches)
