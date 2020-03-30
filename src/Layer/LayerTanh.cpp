@@ -2,16 +2,16 @@
 #include <cmath>
 
 void LayerTanh::followProp() {
-    data.EachCellOperator(left.getData(), [](const f32 left) -> f32 {
-        return tanhf(left) * 0.5f + 0.5f;
+    data.EachCellOperator(left.getData(), [](const f32 l) -> f32 {
+        return tanhf(l) * 0.5f + 0.5f;
     });
 }
 
 void LayerTanh::backProp() {
     if (left.getGrad() != nullptr) {
         Matrix2D &g = *left.getGrad();
-        g.EachCellOperator(left.getData(), [](const f32 left) -> f32 {
-            return (1.f - tanhf(left) * tanhf(left)) * 0.5f;
+        g.EachCellOperator(left.getData(), [](const f32 l) -> f32 {
+            return (1.f - tanhf(l) * tanhf(l)) * 0.5f;
         }, &grad);
     }
 }

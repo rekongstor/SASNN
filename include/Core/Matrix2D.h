@@ -55,17 +55,17 @@ public:
      * Merges all rows into one according to the binary functor
      * @param left [ANY x cols]
      */
-    void MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Merges all columns into one according to the binary functor
      * @param left [rows x ANY]
      */
-    void MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Merges cells into one according to the binary functor (increasing columns for each row)
      * @param left [ANY x ANY]
      */
-    void MergeCellOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
     /**
      * Performs matrix multiplication
      * @param left [rows x ANY]

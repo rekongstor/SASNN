@@ -110,7 +110,7 @@ void Matrix2D::CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*f
 }
 
 
-void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
     for (size_t j = 0; j < cols; ++j) {
         f32 tmp = left(0, j);
         for (size_t i = 1; i < left.getRows(); ++i)
@@ -122,7 +122,7 @@ void Matrix2D::MergeRowOperator(const Matrix2D &left, f32 (*functor)(const f32, 
     }
 }
 
-void Matrix2D::MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
     for (size_t i = 0; i < rows; ++i) {
         f32 tmp = left(i, 0);
         for (size_t j = 1; j < left.getCols(); ++j)
@@ -134,7 +134,7 @@ void Matrix2D::MergeColOperator(const Matrix2D &left, f32 (*functor)(const f32, 
     }
 }
 
-void Matrix2D::MergeCellOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
     f32 tmp = left(0, 0);
     for (size_t j = 1; j < left.getCols(); ++j)
         tmp = functor(tmp, left(0, j));
