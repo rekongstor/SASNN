@@ -1,12 +1,13 @@
 #pragma once
 
 
-#include "../../Core/Matrix2D.h"
+#include "../../../src/Core/Matrix2D.h"
 
 class Layer {
 protected:
     const Matrix2D &self;
     explicit Layer(const Matrix2D &data);
+    virtual void transposeData() = 0;
 public:
     virtual void followProp() = 0;
     virtual void backProp() = 0;

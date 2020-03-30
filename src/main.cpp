@@ -7,14 +7,13 @@
 #include "Layer/LayerLeakyReLU.h"
 #include "Layer/LayerSigmoid.h"
 #include "Layer/LayerTanh.h"
-#include "Layer/LayerSoftMaxRow.h"
-#include "Layer/LayerSoftMaxCol.h"
+#include "Layer/LayerSoftMax.h"
 
 int main() {
-    Layer *weights = new LayerWeights(2, 4, static_cast<f32>(1));
-    Layer *softmax = new LayerSoftMaxCol(*weights);
+    Layer *weights = new LayerWeights(4, 1, static_cast<f32>(1));
+    Layer *softmax = new LayerSoftMax(*weights);
     softmax->getGrad()->Fill(.001f);
-    for (int x = 0; x < 1000; ++x) {
+    for (int x = 0; x < 5000; ++x) {
         softmax->followProp();
         softmax->backProp();
         weights->subGrad();

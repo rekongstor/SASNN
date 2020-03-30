@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "../stdafx.h"
+#include "../../include/stdafx.h"
 
 class Matrix2D {
     size_t rows;
@@ -12,7 +12,7 @@ class Matrix2D {
 public:
     Matrix2D(size_t rows, size_t cols, bool incremental = false);
     explicit Matrix2D(f32 value);
-    f32 &operator()(size_t row, size_t col);
+    void setCell(size_t row, size_t col, f32 val);
     const f32 &operator()(size_t row, size_t col) const;
 
     [[nodiscard]] size_t getRows() const;

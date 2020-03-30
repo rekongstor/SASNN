@@ -14,7 +14,7 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, bool random) : LayerDynamic
         Random *rng = &randomUniform;
         for (size_t i = 0; i < rows; ++i)
             for (size_t j = 0; j < cols; ++j)
-                data(i, j) = rng->Next();
+                data.setCell(i, j, rng->Next());
     } else
         data.Clean();
 }
@@ -27,7 +27,7 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : LayerD
 
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
-            data(i, j) = rng->Next();
+            data.setCell(i, j, rng->Next());
 }
 
 void LayerWeights::subGrad() {

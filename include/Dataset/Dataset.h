@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "../stdafx.h"
-#include "../Core/Matrix2D.h"
+#include "../../src/Core/Matrix2D.h"
 
 class Dataset {
     u32 inputs; // input vector size

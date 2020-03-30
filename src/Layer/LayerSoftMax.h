@@ -3,9 +3,9 @@
 
 #include "../../include/Layer/Abstract/LayerDynamic.h"
 /**
- * Performs SoftMax function on each row
+ * Performs SoftMax function on each column (or row if transposed)
  */
-class LayerSoftMaxRow : public LayerDynamic {
+class LayerSoftMax : public LayerDynamic {
     Layer &left;
     Matrix2D E;
     Matrix2D E_grad;
@@ -13,7 +13,7 @@ class LayerSoftMaxRow : public LayerDynamic {
     Matrix2D Es_grad;
     Matrix2D Es_gradF;
 public:
-    explicit LayerSoftMaxRow(Layer &left);
+    explicit LayerSoftMax(Layer &left, bool transpose = false);
     void followProp() override;
     void backProp() override;
 };

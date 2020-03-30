@@ -12,3 +12,7 @@ LayerDynamic::LayerDynamic(size_t rows, size_t cols) : data(rows, cols),
 Matrix2D *LayerDynamic::getGrad() {
     return &grad;
 }
+
+void LayerDynamic::transposeData() {
+    data.transpose();
+}
