@@ -1,4 +1,4 @@
-#include "LayerSigmoid.h"
+#include "../../../include/Layer/NLF/LayerSigmoid.h"
 #include <cmath>
 
 void LayerSigmoid::followProp() {

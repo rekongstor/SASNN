@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../../include/Layer/Abstract/Layer.h"
+#include "../Abstract/Layer.h"
 
 class LayerData : public Layer {
     void followProp() override;

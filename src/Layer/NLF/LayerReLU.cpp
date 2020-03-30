@@ -1,4 +1,4 @@
-#include "LayerReLU.h"
+#include "../../../include/Layer/NLF/LayerReLU.h"
 
 void LayerReLU::followProp() {
     data.EachCellOperator(left.getData(), [](const f32 l) -> f32 {

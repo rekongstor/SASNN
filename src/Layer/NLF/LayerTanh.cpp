@@ -1,4 +1,4 @@
-#include "LayerTanh.h"
+#include "../../../include/Layer/NLF/LayerTanh.h"
 #include <cmath>
 
 void LayerTanh::followProp() {

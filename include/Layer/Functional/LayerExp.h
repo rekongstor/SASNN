@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include "../../include/Layer/Abstract/LayerDynamic.h"
+#include "../Abstract/LayerDynamic.h"
 
-class LayerExp : LayerDynamic {
+class LayerExp : public LayerDynamic {
     Layer &left;
 public:
     explicit LayerExp(Layer &left);

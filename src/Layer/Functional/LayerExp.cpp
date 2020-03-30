@@ -1,4 +1,4 @@
-#include "LayerExp.h"
+#include "../../../include/Layer/Functional/LayerExp.h"
 #include <cmath>
 
 void LayerExp::followProp() {

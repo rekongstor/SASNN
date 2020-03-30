@@ -14,5 +14,5 @@ Matrix2D *LayerDynamic::getGrad() {
 }
 
 void LayerDynamic::transposeData() {
-    data.transpose();
+    data.Transpose();
 }

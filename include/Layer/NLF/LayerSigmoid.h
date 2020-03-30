@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../../include/Layer/Abstract/LayerDynamic.h"
+#include "../Abstract/LayerDynamic.h"
 
 class LayerSigmoid : public LayerDynamic {
     Layer &left;

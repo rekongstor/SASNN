@@ -21,16 +21,12 @@ Matrix2D::Matrix2D(f32 value) : rows(1),
 
 const f32 &Matrix2D::operator()(size_t row, size_t col) const {
     if (!transposed) {
-#if (DEBUG_LEVEL > 0)
-        if (row >= rows || col >= cols)
-            throw std::out_of_range("Matrix2D is out of range");
-#endif
+        row %= rows;
+        col %= cols;
         return data[row * cols + col];
     }
-#if (DEBUG_LEVEL > 0)
-    if (col >= rows || row >= cols)
-        throw std::out_of_range("Matrix2D is out of range");
-#endif
+    row %= cols;
+    col %= rows;
     return data[col * cols + row];
 }
 
@@ -46,7 +42,7 @@ size_t Matrix2D::getCols() const {
     return cols;
 }
 
-void Matrix2D::copyRow(size_t row, const f32 *data) {
+void Matrix2D::CopyRow(size_t row, const f32 *data) {
     if (row > rows)
         throw std::out_of_range("Matrix2D is out of range");
     memcpy(this->data.data() + row * cols, data, sizeof(f32) * cols);
@@ -98,9 +94,14 @@ void Matrix2D::CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*f
 }
 
 
-void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
     for (size_t j = 0; j < cols; ++j) {
-        f32 tmp = left(0, j);
+        f32 tmp;
+        if (initFunctor == nullptr)
+            tmp = left(0, j);
+        else
+            tmp = initFunctor(left(0, j));
+
         for (size_t i = 1; i < left.getRows(); ++i)
             tmp = functor(tmp, left(i, j));
         if (incremental)
@@ -110,9 +111,14 @@ void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32,
     }
 }
 
-void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
     for (size_t i = 0; i < rows; ++i) {
-        f32 tmp = left(i, 0);
+        f32 tmp;
+        if (initFunctor == nullptr)
+            tmp = left(i, 0);
+        else
+            tmp = initFunctor(left(i, 0));
+
         for (size_t j = 1; j < left.getCols(); ++j)
             tmp = functor(tmp, left(i, j));
         if (incremental)
@@ -122,8 +128,13 @@ void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32,
     }
 }
 
-void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
-    f32 tmp = left(0, 0);
+void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
+    f32 tmp;
+    if (initFunctor == nullptr)
+        tmp = left(0, 0);
+    else
+        tmp = initFunctor(left(0, 0));
+
     for (size_t j = 1; j < left.getCols(); ++j)
         tmp = functor(tmp, left(0, j));
 
@@ -150,7 +161,8 @@ void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
         }
 }
 
-void Matrix2D::transpose() {
+
+void Matrix2D::Transpose() {
     transposed = !transposed;
 }
 
@@ -167,16 +179,16 @@ void Matrix2D::Fill(f32 value) {
 }
 
 void Matrix2D::setCell(size_t row, size_t col, f32 val) {
-    if (std::isinf(val))
-        if ((val) > 0.f)
-            val = std::numeric_limits<f32>::max();
-        else
-            val = std::numeric_limits<f32>::min();
-    if (std::isnan(val))
-        if ((val) > 0.f)
-            val = 0.f;
-        else
-            val = -0.f;
+//    if (std::isinf(val))
+//        if ((val) > 0.f)
+//            val = std::numeric_limits<f32>::max();
+//        else
+//            val = std::numeric_limits<f32>::min();
+//    if (std::isnan(val))
+//        if ((val) > 0.f)
+//            val = 0.f;
+//        else
+//            val = -0.f;
 
     if (!transposed) {
 #if (DEBUG_LEVEL > 0)
@@ -191,4 +203,13 @@ void Matrix2D::setCell(size_t row, size_t col, f32 val) {
         throw std::out_of_range("Matrix2D is out of range");
 #endif
     data[col * cols + row] = val;
+}
+
+void Matrix2D::Print() const {
+    for (size_t i = 0; i < getRows(); ++i) {
+        for (size_t j = 0; j < getCols(); ++j)
+            std::cout << operator()(i, j) << " ";
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }

@@ -1,15 +1,25 @@
 #include <iostream>
-#include <cmath>
-#include "Layer/LayerWeights.h"
-#include "Layer/LayerData.h"
-#include "Layer/LayerSumCols.h"
+#include "../include/Layer/Simple/LayerWeights.h"
+#include "../include/Layer/Simple/LayerData.h"
+#include "Layer/Functional/LayerStableSoftMax.h"
+
 
 int main() {
-    Layer *weights = new LayerWeights(4, 4, static_cast<f32>(1));
-    Layer *layer = new LayerSumCols(*weights);
-    layer->getGrad()->Fill(0.1f);
-    layer->followProp();
-    layer->backProp();
+    Layer *Weights = new LayerWeights(2, 2);
+    auto l = Weights->getGrad();
+    for (size_t i = 0; i < l->getRows(); ++i)
+        l->setCell(i, i, -1.f);
+    Weights->subGrad();
+
+    Layer *SoftMax = new LayerStableSoftMax(*Weights);
+    auto g = SoftMax->getGrad();
+    g->Fill(0.f);
+    for (size_t i = 0; i < g->getRows(); ++i)
+        g->setCell(i, i, 1.f);
+
+    SoftMax->followProp();
+    SoftMax->backProp();
+    Weights->subGrad();
 
     return 0;
 }

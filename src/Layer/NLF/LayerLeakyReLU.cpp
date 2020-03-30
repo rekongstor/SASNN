@@ -1,4 +1,4 @@
-#include "LayerLeakyReLU.h"
+#include "../../../include/Layer/NLF/LayerLeakyReLU.h"
 
 void LayerLeakyReLU::followProp() {
     data.CellOperator(left.getData(), right.getData(), [](const f32 l, const f32 r) -> f32 {
