@@ -9,7 +9,7 @@ void LayerLeakyReLU::followProp() {
 void LayerLeakyReLU::backProp() {
     if (left.getGrad() != nullptr) {
         Matrix2D &g = *left.getGrad();
-        g.CellOperator(data, right.getData(), [](const f32 left, const f32 right) -> f32 {
+        g.CellOperator(left.getData(), right.getData(), [](const f32 left, const f32 right) -> f32 {
             return left <= 0.f ? right : 1.f;
         }, &grad);
     }

@@ -9,7 +9,7 @@ void LayerReLU::followProp() {
 void LayerReLU::backProp() {
     if (left.getGrad() != nullptr) {
         Matrix2D &g = *left.getGrad();
-        g.EachCellOperator(data, [](const f32 left) -> f32 {
+        g.EachCellOperator(left.getData(), [](const f32 left) -> f32 {
             return left <= 0.f ? 0.f : 1.f;
         }, &grad);
     }

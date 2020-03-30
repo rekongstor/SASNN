@@ -5,17 +5,25 @@
 #include "Layer/LayerData.h"
 #include "Layer/LayerFullyConnected.h"
 #include "Layer/LayerLeakyReLU.h"
+#include "Layer/LayerSigmoid.h"
 
 int main() {
-
-    Layer *weights = new LayerWeights(2, 4, static_cast<f32>(2));
-
-    Matrix2D d(0.01f);
-    Layer *leak = new LayerData(d);
-    Layer *pLeakyReLu = new LayerLeakyReLU(*weights, *leak);
-    pLeakyReLu->getGrad()->Fill((1.f));
-    pLeakyReLu->followProp();
-    pLeakyReLu->backProp();
-
+    Matrix2D leak(0.01f);
+    Layer *lr = new LayerData(leak);
+    Layer *weights = new LayerWeights(2, 4, static_cast<f32>(1));
+    Layer *nlf = new LayerReLU(*weights);
+    nlf->getGrad()->Fill(1.f);
+    nlf->followProp();
+    nlf->backProp();
+    weights->clearGrad();
+    nlf = new LayerLeakyReLU(*weights, *lr);
+    nlf->getGrad()->Fill(1.f);
+    nlf->followProp();
+    nlf->backProp();
+    weights->clearGrad();
+    nlf = new LayerSigmoid(*weights);
+    nlf->getGrad()->Fill(1.f);
+    nlf->followProp();
+    nlf->backProp();
     return 0;
 }
