@@ -29,3 +29,9 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : LayerD
         for (size_t j = 0; j < cols; ++j)
             data(i, j) = rng->Next();
 }
+
+void LayerWeights::subGrad() {
+    data.EachCellOperator(data, grad, [](const f32 l, const f32 r) -> f32 {
+        return l - r;
+    });
+}

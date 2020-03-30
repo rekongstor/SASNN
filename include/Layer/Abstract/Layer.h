@@ -13,6 +13,7 @@ public:
     virtual void clearGrad() = 0;
     [[nodiscard]] const Matrix2D &getData() const;
     virtual Matrix2D *getGrad();
+    virtual void subGrad();
     virtual ~Layer() = default;
 };
 
