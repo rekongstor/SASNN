@@ -5,11 +5,10 @@
 
 class LayerSigmoid : public LayerDynamic {
     Layer &left;
-public:
-    explicit LayerSigmoid(Layer &left);
-public:
     void followProp() override;
     void backProp() override;
+public:
+    explicit LayerSigmoid(Layer &left);
 };
 
 

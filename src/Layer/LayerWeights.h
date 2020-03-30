@@ -5,7 +5,6 @@
 #include "../../include/Layer/Abstract/LayerDynamic.h"
 
 class LayerWeights : public LayerDynamic {
-private:
     void backProp() override;
     void followProp() override;
 public:

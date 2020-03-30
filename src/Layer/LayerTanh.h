@@ -3,13 +3,12 @@
 
 #include "../../include/Layer/Abstract/LayerDynamic.h"
 
-class LayerLeakyReLU : public LayerDynamic {
-    Layer& left;
-    Layer& right;
+class LayerTanh : public LayerDynamic {
+    Layer &left;
     void followProp() override;
     void backProp() override;
 public:
-    LayerLeakyReLU(Layer &left, Layer &right);
+    explicit LayerTanh(Layer &left);
 };
 
 
