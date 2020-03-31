@@ -179,16 +179,16 @@ void Matrix2D::Fill(f32 value) {
 }
 
 void Matrix2D::setCell(size_t row, size_t col, f32 val) {
-//    if (std::isinf(val))
-//        if ((val) > 0.f)
-//            val = std::numeric_limits<f32>::max();
-//        else
-//            val = std::numeric_limits<f32>::min();
-//    if (std::isnan(val))
-//        if ((val) > 0.f)
-//            val = 0.f;
-//        else
-//            val = -0.f;
+    if (std::isinf(val))
+        if ((val) > 0.f)
+            val = std::numeric_limits<f32>::max();
+        else
+            val = std::numeric_limits<f32>::min();
+    if (std::isnan(val))
+        if ((val) > 0.f)
+            val = 0.f;
+        else
+            val = -0.f;
 
     if (!transposed) {
 #if (DEBUG_LEVEL > 0)
@@ -208,7 +208,7 @@ void Matrix2D::setCell(size_t row, size_t col, f32 val) {
 void Matrix2D::Print() const {
     for (size_t i = 0; i < getRows(); ++i) {
         for (size_t j = 0; j < getCols(); ++j)
-            std::cout << operator()(i, j) << " ";
+            printf("%.3f ", operator()(i, j));
         std::cout << std::endl;
     }
     std::cout << std::endl;
