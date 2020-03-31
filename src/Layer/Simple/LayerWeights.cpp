@@ -32,16 +32,19 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : LayerD
             data.setCell(i, j, rng->Next());
 }
 
-void LayerWeights::subGrad() {
+void LayerWeights::subGrad(f32 step) {
     // Gradient normalization
     gradLength.MergeCellsOperator(grad, [](const f32 l, const f32 r) -> f32 {
         return l + r * r;
     }, nullptr, [](const f32 l) -> f32 {
         return l * l;
     });
-    gradLength.setCell(0, 0, sqrtf(gradLength(0, 0)));
+
+    gradLength.setCell(0, 0, sqrtf(gradLength(0, 0)) / step);
+//    gradLength.setCell(0, 0, 1 / step);
+
     grad.CellOperator(grad, gradLength, [](const f32 l, const f32 r) -> f32 {
-        return l / r;
+        return -l + l / r;
     });
 
     data.EachCellOperator(data, grad, [](const f32 l, const f32 r) -> f32 {
@@ -51,5 +54,12 @@ void LayerWeights::subGrad() {
 
 void LayerWeights::assignData(const Matrix2D *d) {
     data = *d;
+}
+
+void LayerWeights::clearGrad() {
+    grad.EachCellOperator(grad,[](const f32 l)->f32{
+        return l * 0.9f;
+    });
+    grad.Clean();
 }
 

@@ -13,7 +13,7 @@ public:
     Matrix2D *getGrad() final;
     void assignData(const Matrix2D *d) override;
 private:
-    void clearGrad() final;
+    void clearGrad() override ;
 };
 
 

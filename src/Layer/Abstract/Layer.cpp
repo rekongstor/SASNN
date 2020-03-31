@@ -12,7 +12,7 @@ Matrix2D *Layer::getGrad() {
     return nullptr;
 }
 
-void Layer::subGrad() {
+void Layer::subGrad(f32) {
 
 }
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "../../include/NeuralNetwork/ClassificationNN.h"
 #include "../../include/Layer/Simple/LayerWeights.h"
 #include "../../include/Layer/Simple/LayerData.h"
@@ -30,17 +31,24 @@ f32 ClassificationNN::Train(u64 steps) {
         FollowPropagation();
         BackPropagation();
     }
-    return GetAccuracy(DataSet.GetValidationSamples());
+    std::ofstream out("nn.txt");
+    auto &a = WeightsLayers[0]->getData();
+    for (size_t i = 0; i < a.getCols(); ++i)
+        for (size_t j = 0; j < a.getRows(); ++j)
+            out << a(j, i) << std::endl;
+    out.close();
+    f32 acc = GetAccuracy(DataSet.GetValidationSamples());;
+    return acc;
 }
 
 ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
     PARAM('l', 1.f);
-    PARAM('g', 0.01f);
+    PARAM('g', 1.f);
 
     // Setting dataset layers
     auto[train_inputs, train_outputs] = DataSet.GetTrainSample(false);
-    auto Input = LAYER(LayerData,train_inputs); // [batch_size x inputs]
+    auto Input = LAYER(LayerData, train_inputs); // [batch_size x inputs]
     auto Output = LAYER(LayerData, train_outputs); // [batch_size x outputs]
     IO = {Input, Output};
 
@@ -48,7 +56,8 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
     auto L2RegParam = LAYER(LayerData, *HyperParams['l']);
 
     // Setting FullyConnected architecture
-    auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(), static_cast<f32>(dataset.GetInputs())); // [inputs x outputs]
+    //auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(), static_cast<f32>(dataset.GetInputs())); // [inputs x outputs]
+    auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs()); // [inputs x outputs]
     WeightsLayers.emplace_back(Weights);
     auto FullyConnected = LAYER(LayerFullyConnected, *Input, *Weights); // [batch_size x outputs]
 
@@ -80,7 +89,7 @@ f32 ClassificationNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const
         Outputs->assignData(&outputs[i]);
         FollowPropagation(AccuracyLayer.second.get());
         AccuracyLayer.first->followProp();
-        accuracy += AccuracyLayer.first->getData()(0,0);
+        accuracy += AccuracyLayer.first->getData()(0, 0);
     }
     accuracy /= static_cast<f32>(DataSet.GetBatchSize() * inputs.size());
     return accuracy;
@@ -97,13 +106,13 @@ void ClassificationNN::FollowPropagation(Layer *stop_layer) {
 
 void ClassificationNN::BackPropagation() {
     // Back propagation
-    LossFunction->getGrad()->Fill((*HyperParams['g'])(0, 0));
+    LossFunction->getGrad()->Fill(1.f);
     for (auto it = Layers.rbegin(); it != Layers.rend(); ++it)
         (*it)->backProp();
 
     // Perform gradient descent
     for (auto &Weight : WeightsLayers)
-        Weight->subGrad();
+        Weight->subGrad((*HyperParams['g'])(0, 0));
 
     // Clear gradients
     for (auto &Layer : Layers)

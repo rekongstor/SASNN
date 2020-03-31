@@ -15,7 +15,7 @@ public:
     virtual void assignData(const Matrix2D *) = 0;
     [[nodiscard]] const Matrix2D &getData() const;
     virtual Matrix2D *getGrad();
-    virtual void subGrad();
+    virtual void subGrad(f32 step);
     virtual ~Layer() = default;
 };
 

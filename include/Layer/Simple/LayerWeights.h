@@ -9,9 +9,10 @@ class LayerWeights : public LayerDynamic {
     void followProp() override;
     void assignData(const Matrix2D *d) override;
 
-    void subGrad() override;
+    void subGrad(f32 step) override;
     Matrix2D gradLength;
-    void normalizeGrad();
+public:
+    void clearGrad() override;
 public:
     LayerWeights(size_t rows, size_t cols, bool random = false);
     LayerWeights(size_t rows, size_t cols, f32 xavier_inputs);
