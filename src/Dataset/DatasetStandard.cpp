@@ -1,6 +1,7 @@
 #include <fstream>
 #include "../../include/Dataset/DatasetStandard.h"
 #include <climits>
+#include <iostream>
 
 template<class T>
 inline T DatasetStandard::ConvertEndian(T value) {
@@ -14,7 +15,10 @@ inline T DatasetStandard::ConvertEndian(T value) {
     return tmp;
 }
 
-DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 testCoef) : batchSize(batchSize) {
+DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 testCoef, f32 validationCoef) : batchSize(batchSize) {
+    size_t trainSamples; // size of train set
+    size_t validationSamples; // size of validation set
+    size_t testSamples; // size of test set
     // u64 endian check = 4221
     // u32 inputs
     // u32 outputs
@@ -37,8 +41,12 @@ DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 tes
 
     testSamples = dataSize * testCoef;
     trainSamples = dataSize - testSamples;
+    validationSamples = trainSamples * validationCoef;
+    trainSamples = trainSamples - validationSamples;
+
     testSamples /= batchSize;
     trainSamples /= batchSize;
+    validationSamples /= batchSize;
     if (testSamples <= 0 || trainSamples <= 0)
         throw std::runtime_error("Data size cannot be negative or zero");
     {
@@ -46,6 +54,8 @@ DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 tes
         file.read(reinterpret_cast<char *>(data.data()), dataSize * inputs * sizeof(f32));
         for (size_t i = 0; i < trainSamples; ++i)
             train_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
+        for (size_t i = 0; i < validationSamples; ++i)
+            validation_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
         for (size_t i = trainSamples; i < trainSamples + testSamples; ++i)
             test_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
     }
@@ -54,9 +64,18 @@ DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 tes
         file.read(reinterpret_cast<char *>(data.data()), dataSize * outputs * sizeof(f32));
         for (size_t i = 0; i < trainSamples; ++i)
             train_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
+        for (size_t i = 0; i < validationSamples; ++i)
+            validation_inputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
         for (size_t i = trainSamples; i < trainSamples + testSamples; ++i)
             test_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
     }
+    std::cout <<
+              "Dataset loaded!" << std::endl <<
+              "Data size: " << dataSize << std::endl <<
+              "Train size: " << trainSamples * batchSize << std::endl <<
+              "Validation size: " << validationSamples * batchSize << std::endl <<
+              "Test size: " << testSamples * batchSize << std::endl <<
+              "Unused size: " << (dataSize - (trainSamples + validationSamples + testSamples) * batchSize) << std::endl;
 }
 
 std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample() {
@@ -80,4 +99,11 @@ u32 DatasetStandard::GetInputs() const {
 
 u32 DatasetStandard::GetOutputs() const {
     return outputs;
+}
+
+std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetValidationSample() {
+    ++currentValidationSample;
+    if (currentValidationSample >= test_inputs.size())
+        currentValidationSample = -1;
+    return {test_inputs[currentValidationSample], test_outputs[currentValidationSample]};
 }

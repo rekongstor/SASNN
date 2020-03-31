@@ -11,6 +11,8 @@
 
 
 #define LAYER(Type, ...) Layers.emplace_back(std::dynamic_pointer_cast<Layer>(std::make_shared< Type >( __VA_ARGS__ )))
+#define PARAM(Param, Value) HyperParams.emplace( Param , std::make_shared<Matrix2D>( Value ))
+
 
 f32 ClassificationNN::GetAccuracy() {
     return 0;
@@ -19,7 +21,7 @@ f32 ClassificationNN::GetAccuracy() {
 void ClassificationNN::Train(u64 steps) {
     for (u64 i = 0; i < steps; ++i) {
         // Forward propagation
-        LossFunction->getGrad()->Fill(HyperParams["GradStep"](0, 0));
+        LossFunction->getGrad()->Fill((*HyperParams['g'])(0, 0));
         for (auto &Layer : Layers)
             Layer->followProp();
 
@@ -45,8 +47,8 @@ void ClassificationNN::Train(u64 steps) {
 
 ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
-    HyperParams.insert({"L2Reg", Matrix2D(0.01f)});
-    HyperParams.insert({"GradStep", Matrix2D(0.0001f)});
+    PARAM('l', 0.01f);
+    PARAM('g', 0.0001f);
 
     // Setting dataset layers
     auto[train_inputs, train_outputs] = dataset.GetTrainSample();
@@ -55,7 +57,7 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
     IO = {Input, Output};
 
     // Setting hyper-parameter layers
-    auto L2RegParam = LAYER(LayerData, HyperParams["L2Reg"]);
+    auto L2RegParam = LAYER(LayerData, *HyperParams['l']);
 
     // Setting FullyConnected architecture
     auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(), static_cast<f32>(dataset.GetInputs())); // [inputs x outputs]
@@ -70,10 +72,10 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
     LossFunction = Loss;
 }
 
-void ClassificationNN::ModifyParam(const char *param_name, f32 value) {
+void ClassificationNN::ModifyParam(char param_name, f32 value) {
     auto m = HyperParams.find(param_name);
     if (m != HyperParams.end())
-        m->second.setCell(0, 0, value);
+        (*m->second).setCell(0, 0, value);
     else
         std::cout << "Invalid parameter name: " << param_name << std::endl;
 }

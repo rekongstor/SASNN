@@ -7,13 +7,15 @@
 const char *fileName = "";
 size_t batchSize = 512;
 f32 testCoef = 0.1f;
+f32 validationCoef = 0.1f;
 
 int main(s32 argc, const s8 *argv[]) {
     if (argc < 2) {
         std::cout << "Please specify an input file" << std::endl;
         return 4221;
-    } else if (argc > 1)
+    } else
         fileName = argv[1];
+
     if (!std::filesystem::exists(fileName)) {
         std::cout << "Invalid file name: " << argv[1] << std::endl;
         return 1;
@@ -34,9 +36,17 @@ int main(s32 argc, const s8 *argv[]) {
             std::cout << "Invalid test coef" << argv[3] << std::endl;
             return 3;
         }
+    if (argc > 4)
+        try {
+            validationCoef = std::stof(argv[4]);
+        }
+        catch (std::exception const &e) {
+            std::cout << "Invalid validation coef" << argv[3] << std::endl;
+            return 4;
+        }
 
 
-    DatasetStandard datasetStandard(std::ifstream(fileName, std::ios::binary), batchSize, testCoef);
+    DatasetStandard datasetStandard(std::ifstream(fileName, std::ios::binary), batchSize, testCoef, validationCoef);
     ClassificationNN classificationNn(datasetStandard, 1u, 15u);
 
     NeuralNetwork &NN = classificationNn;
