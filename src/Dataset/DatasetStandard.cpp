@@ -15,22 +15,24 @@ inline T DatasetStandard::ConvertEndian(T value) {
     return tmp;
 }
 
-DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 testCoef, f32 validationCoef) : batchSize(batchSize) {
+DatasetStandard::DatasetStandard(const char* filename, size_t batchSize, f32 testCoef, f32 validationCoef) : batchSize(batchSize) {
     size_t trainSamples; // size of train set
     size_t validationSamples; // size of validation set
     size_t testSamples; // size of test set
+    std::ifstream file(filename, std::ios::binary);
     // u64 endian check = 4221
     // u32 inputs
     // u32 outputs
     // u64 dataSize
     // f32[inputs] * dataSize
     // f32[outputs] * dataSize
+
     u64 endian_check;
     u64 dataSize;
-    file.read(reinterpret_cast<char *>(&endian_check), sizeof(endian_check));
-    file.read(reinterpret_cast<char *>(&inputs), sizeof(inputs));
-    file.read(reinterpret_cast<char *>(&outputs), sizeof(outputs));
-    file.read(reinterpret_cast<char *>(&dataSize), sizeof(dataSize));
+    file.read(reinterpret_cast<char*>(&endian_check), sizeof(endian_check));
+    file.read(reinterpret_cast<char*>(&inputs), sizeof(inputs));
+    file.read(reinterpret_cast<char*>(&outputs), sizeof(outputs));
+    file.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
     if (endian_check != 4221) {
         if (ConvertEndian(endian_check) != 4221)
             throw std::runtime_error("Invalid file format");
@@ -39,9 +41,9 @@ DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 tes
         dataSize = ConvertEndian(dataSize);
     }
 
-    testSamples = dataSize * testCoef;
+    testSamples = dataSize * static_cast<f64>(testCoef);
     trainSamples = dataSize - testSamples;
-    validationSamples = trainSamples * validationCoef;
+    validationSamples = trainSamples * static_cast<f64>(validationCoef);
     trainSamples = trainSamples - validationSamples;
 
     testSamples /= batchSize;
@@ -60,8 +62,8 @@ DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 tes
             test_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
     }
     {
-        std::vector<f32> data(dataSize * outputs);
-        file.read(reinterpret_cast<char *>(data.data()), dataSize * outputs * sizeof(f32));
+        std::vector<f32> data(dataSize * static_cast<u64>(outputs));
+        file.read(reinterpret_cast<char *>(data.data()), dataSize * static_cast<u64>(outputs) * sizeof(f32));
         for (size_t i = 0; i < trainSamples; ++i)
             train_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
         for (size_t i = trainSamples; i < trainSamples + validationSamples; ++i)

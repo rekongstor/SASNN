@@ -10,7 +10,7 @@ size_t batchSize = 512;
 f32 testCoef = 0.1f;
 f32 validationCoef = 0.1f;
 
-int main(s32 argc, const s8 *argv[]) {
+int main(int argc, const char *argv[]) {
     if (argc < 2) {
         std::cout << "Please specify an input file" << std::endl;
         return 4221;
@@ -47,7 +47,7 @@ int main(s32 argc, const s8 *argv[]) {
         }
 
 
-    DatasetStandard datasetStandard(std::ifstream(fileName, std::ios::binary), batchSize, testCoef, validationCoef);
+    DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
     ClassificationNN classificationNn(datasetStandard, 1u, 15u);
 
     NeuralNetwork &NN = classificationNn;
