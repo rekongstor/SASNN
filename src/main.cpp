@@ -40,6 +40,7 @@ int main(s32 argc, const s8 *argv[]) {
     ClassificationNN classificationNn(datasetStandard, 1u, 15u);
 
     NeuralNetwork &NN = classificationNn;
+
     NN.Train(500);
     return 0;
 }

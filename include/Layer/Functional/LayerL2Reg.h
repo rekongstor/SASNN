@@ -5,10 +5,11 @@
 
 class LayerL2Reg : public LayerDynamic {
     Layer &left;
+    Layer &right;
     void followProp() override;
     void backProp() override;
 public:
-    explicit LayerL2Reg(Layer &left);
+    explicit LayerL2Reg(Layer &left, Layer &param);
 };
 
 

@@ -6,17 +6,21 @@ void LayerL2Reg::followProp() {
     }, nullptr, [](const f32 l) -> f32 {
         return l * l;
     });
+    data.CellOperator(data,right.getData(), [](const f32 l, const f32 r) -> f32{
+        return l * r;
+    });
 }
 
 void LayerL2Reg::backProp() {
     if (left.getGrad() != nullptr) {
         Matrix2D &g = *left.getGrad();
-        g.EachCellOperator(left.getData(), [](const f32 l) -> f32 {
-            return 2.f * l;
+        g.CellOperator(left.getData(),right.getData(), [](const f32 l, const f32 r) -> f32 {
+            return 2.f * l * r;
         }, &grad);
     }
 }
 
-LayerL2Reg::LayerL2Reg(Layer &left) : LayerDynamic(1, 1),
-                                      left(left) {}
+LayerL2Reg::LayerL2Reg(Layer &left, Layer &param) : LayerDynamic(1, 1),
+                                                    left(left),
+                                                    right(param) {}
 
