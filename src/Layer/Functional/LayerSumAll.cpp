@@ -1,9 +1,9 @@
 #include "LayerSumAll.h"
 
 void LayerSumAll::followProp() {
-data.MergeCellsOperator(left.getData(),[](const f32 l, const f32 r) -> f32 {
-   return l + r;
-});
+    data.MergeCellsOperator(left.getData(), [](const f32 l, const f32 r) -> f32 {
+        return l + r;
+    });
 }
 
 void LayerSumAll::backProp() {
