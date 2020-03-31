@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "../../include/stdafx.h"
+#include "../stdafx.h"
 
 class Matrix2D {
     size_t rows;
@@ -17,7 +17,7 @@ public:
 
     [[nodiscard]] size_t getRows() const;
     [[nodiscard]] size_t getCols() const;
-    void CopyRow(size_t row, const f32 *data);
+    void AssignData(f32 *src);
     void Transpose();
     void Clean();
     void Print() const;

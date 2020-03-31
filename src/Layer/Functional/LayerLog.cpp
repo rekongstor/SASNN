@@ -1,4 +1,4 @@
-#include "LayerLog.h"
+#include "../../../include/Layer/Functional/LayerLog.h"
 #include <cmath>
 
 void LayerLog::followProp() {

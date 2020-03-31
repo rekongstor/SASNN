@@ -35,3 +35,7 @@ void LayerWeights::subGrad() {
         return l - r;
     });
 }
+
+void LayerWeights::assignData(const Matrix2D *d) {
+    data = *d;
+}

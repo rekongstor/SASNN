@@ -1,32 +1,45 @@
 #include <iostream>
-#include "../include/Layer/Simple/LayerWeights.h"
-#include "../include/Layer/Simple/LayerData.h"
-#include "Layer/Functional/LayerStableSoftMax.h"
-#include "Layer/Functional/LayerCrossEntropyLoss.h"
+#include <fstream>
+#include <filesystem>
+#include "../include/Dataset/DatasetStandard.h"
+#include "../include/NeuralNetwork/ClassificationNN.h"
 
+const char *fileName = "";
+size_t batchSize = 512;
+f32 testCoef = 0.1f;
 
-int main() {
-    Matrix2D gt(2, 10);
-    gt.Fill(-.1f);
-    gt.setCell(0, 5, 1.f);
-    gt.setCell(1, 2, 1.f);
-    Layer *L = new LayerData(gt);
-
-    Layer *Weights = new LayerWeights(2, 10);
-    Layer *SoftMax = new LayerStableSoftMax(*Weights);
-
-
-    Layer *CEL = new LayerCrossEntropyLoss(*SoftMax, *L);
-    CEL->getGrad()->setCell(0, 0, .1f);
-    for (int i = 0; i < 9; ++i) {
-        SoftMax->followProp();
-        CEL->followProp();
-
-        CEL->backProp();
-        SoftMax->backProp();
-
-        SoftMax->getData().Print();
-        Weights->subGrad();
+int main(s32 argc, const s8 *argv[]) {
+    if (argc < 2) {
+        std::cout << "Please specify an input file" << std::endl;
+        return 4221;
+    } else if (argc > 1)
+        fileName = argv[1];
+    if (!std::filesystem::exists(fileName)) {
+        std::cout << "Invalid file name: " << argv[1] << std::endl;
+        return 1;
     }
+    if (argc > 2)
+        try {
+            batchSize = std::stoi(argv[2]);
+        }
+        catch (std::exception const &e) {
+            std::cout << "Invalid batch size" << argv[2] << std::endl;
+            return 2;
+        }
+    if (argc > 3)
+        try {
+            testCoef = std::stof(argv[3]);
+        }
+        catch (std::exception const &e) {
+            std::cout << "Invalid test coef" << argv[3] << std::endl;
+            return 3;
+        }
+
+
+    DatasetStandard datasetStandard(std::ifstream(fileName, std::ios::binary), batchSize, testCoef);
+    ClassificationNN classificationNn(datasetStandard, 1u, 15u);
+
+    NeuralNetwork &NN = classificationNn;
+    NN.Train(500);
     return 0;
 }

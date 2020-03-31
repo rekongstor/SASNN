@@ -8,11 +8,12 @@ protected:
     Matrix2D data;
     Matrix2D grad;
     LayerDynamic(size_t rows, size_t cols);
-    void transposeData() override;
+    void transposeData() final;
 public:
-    Matrix2D *getGrad() override;
+    Matrix2D *getGrad() final;
+    void assignData(const Matrix2D *d) override;
 private:
-    void clearGrad() override;
+    void clearGrad() final;
 };
 
 

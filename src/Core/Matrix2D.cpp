@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
-#include "Matrix2D.h"
+#include "../../include/Core/Matrix2D.h"
 #include "memory.h"
 
 Matrix2D::Matrix2D(size_t rows, size_t cols, bool incremental) : rows(rows),
@@ -40,12 +40,6 @@ size_t Matrix2D::getCols() const {
     if (transposed)
         return rows;
     return cols;
-}
-
-void Matrix2D::CopyRow(size_t row, const f32 *data) {
-    if (row > rows)
-        throw std::out_of_range("Matrix2D is out of range");
-    memcpy(this->data.data() + row * cols, data, sizeof(f32) * cols);
 }
 
 void Matrix2D::EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const Matrix2D *grad) {
@@ -212,4 +206,8 @@ void Matrix2D::Print() const {
         std::cout << std::endl;
     }
     std::cout << std::endl;
+}
+
+void Matrix2D::AssignData(f32 *src) {
+    memcpy(data.data(), src, rows * cols * sizeof(f32));
 }

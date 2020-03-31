@@ -11,6 +11,7 @@ protected:
     void transposeData() override;
 public:
     explicit LayerData(const Matrix2D& data);
+    void assignData(const Matrix2D *d) override;
 };
 
 

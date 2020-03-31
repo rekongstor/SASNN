@@ -22,3 +22,7 @@ void LayerData::transposeData() {
     throw std::runtime_error("Constant data could not be transposed");
 #endif
 }
+
+void LayerData::assignData(const Matrix2D *d) {
+    self = d;
+}

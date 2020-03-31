@@ -1,10 +1,10 @@
 #include "../../../include/Layer/Abstract/Layer.h"
 
 const Matrix2D &Layer::getData() const {
-    return self;
+    return *self;
 }
 
-Layer::Layer(const Matrix2D &data) : self(data) {
+Layer::Layer(const Matrix2D &data) : self(&data) {
 
 }
 

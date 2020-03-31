@@ -5,11 +5,11 @@
 #include "../Abstract/LayerDynamic.h"
 
 class LayerWeights : public LayerDynamic {
-public:
-    void subGrad() override;
-private:
     void backProp() override;
     void followProp() override;
+    void assignData(const Matrix2D *d) override;
+
+    void subGrad() override;
 public:
     LayerWeights(size_t rows, size_t cols, bool random = false);
     LayerWeights(size_t rows, size_t cols, f32 xavier_inputs);

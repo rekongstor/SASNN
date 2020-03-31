@@ -1,4 +1,4 @@
-#include "LayerStableSoftMax.h"
+#include "../../../include/Layer/Functional/LayerStableSoftMax.h"
 #include <cmath>
 
 void LayerStableSoftMax::followProp() {

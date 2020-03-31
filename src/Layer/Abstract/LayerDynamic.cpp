@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "../../../include/Layer/Abstract/LayerDynamic.h"
 
 void LayerDynamic::clearGrad() {
@@ -17,3 +18,6 @@ void LayerDynamic::transposeData() {
     data.Transpose();
 }
 
+void LayerDynamic::assignData(const Matrix2D *) {
+    throw std::runtime_error("Unable to assign data to not a simple layer");
+}
