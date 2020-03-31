@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <string>
 #include "../include/Dataset/DatasetStandard.h"
 #include "../include/NeuralNetwork/ClassificationNN.h"
 
