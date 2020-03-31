@@ -5,6 +5,7 @@ LayerData::LayerData(const Matrix2D &data) : Layer(data) {
 
 }
 
+
 void LayerData::followProp() {
 
 }

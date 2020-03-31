@@ -9,9 +9,7 @@ class DatasetStandard : public Dataset {
     u32 inputs = 0; // input vector size
     u32 outputs = 0; // output vector size
     size_t batchSize;
-    size_t currentTrainSample = -1;
-    size_t currentValidationSample = -1;
-    size_t currentTestSample = -1;
+    size_t currentTrainSample = 0;
     std::vector<Matrix2D> train_inputs; // [batchSize x inputs]
     std::vector<Matrix2D> train_outputs; // [batchSize x outputs]
     std::vector<Matrix2D> validation_inputs; // [batchSize x inputs]
@@ -20,14 +18,13 @@ class DatasetStandard : public Dataset {
     std::vector<Matrix2D> test_outputs; // [batchSize x outputs]
     template<class T>
     T ConvertEndian(T value);
-    std::pair<const Matrix2D &, const Matrix2D &> GetTrainSample() override;
-    std::pair<const Matrix2D &, const Matrix2D &> GetValidationSample() override;
-    std::pair<const Matrix2D &, const Matrix2D &> GetTestSample() override;
+    std::pair<const Matrix2D &, const Matrix2D &> GetTrainSample(bool moveCursor) override;
+    std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> GetValidationSamples() override;
+    std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> GetTestSamples() override;
     [[nodiscard]] u32 GetInputs() const override;
-    [[nodiscard]]  u32 GetOutputs() const override;
+    [[nodiscard]] u32 GetOutputs() const override;
+    [[nodiscard]] u32 GetBatchSize() const override;
 public:
     explicit DatasetStandard(std::ifstream &&file, size_t batchSize, f32 testCoef, f32 validationCoef);
 };
-
-
 

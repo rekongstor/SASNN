@@ -8,11 +8,11 @@ class LayerStableSoftMax : public LayerDynamic {
     Matrix2D Es;
     Matrix2D maxData;
     Matrix2D normalizedData;
-    bool ColumnOriented;
+    bool RowOriented;
     void followProp() override;
     void backProp() override;
 public:
-    explicit LayerStableSoftMax(Layer &left, bool RowOriented = true);
+    explicit LayerStableSoftMax(Layer &left, bool rowOriented);
 };
 
 

@@ -73,5 +73,18 @@ public:
      * @param right [ANY x cols]
      */
     void MultiplyOperator(const Matrix2D &left, const Matrix2D &right);
+
+    /**
+     * Compares values in the each row
+     * @param left [rows x cols]
+     * @param right [1 x cols]
+     */
+    void FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    /**
+     * Compares values in the each column
+     * @param left [rows x cols]
+     * @param right [rows x 1]
+     */
+    void FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
 };
 

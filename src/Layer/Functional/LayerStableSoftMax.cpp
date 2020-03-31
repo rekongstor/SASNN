@@ -2,8 +2,8 @@
 #include <cmath>
 
 void LayerStableSoftMax::followProp() {
-    auto Merge_functor = ColumnOriented ? &Matrix2D::MergeColsOperator : &Matrix2D::MergeRowsOperator;
-    auto Data_functor = ColumnOriented ? &Matrix2D::ColOperator : &Matrix2D::RowOperator;
+    auto Merge_functor = RowOriented ? &Matrix2D::MergeColsOperator : &Matrix2D::MergeRowsOperator;
+    auto Data_functor = RowOriented ? &Matrix2D::ColOperator : &Matrix2D::RowOperator;
     (maxData.*Merge_functor)(left.getData(), [](const f32 l, const f32 r) -> f32 {
         return fmaxf(l, r);
     }, nullptr, nullptr);
@@ -30,14 +30,14 @@ void LayerStableSoftMax::backProp() {
     }
 }
 
-LayerStableSoftMax::LayerStableSoftMax(Layer &left, bool RowOriented) : LayerDynamic(left.getData().getRows(), left.getData().getCols()),
+LayerStableSoftMax::LayerStableSoftMax(Layer &left, bool rowOriented) : LayerDynamic(left.getData().getRows(), left.getData().getCols()),
                                                                         left(left),
-                                                                        Es(RowOriented ? left.getData().getRows() : 1,
-                                                                           RowOriented ? 1 : left.getData().getCols()),
-                                                                        ColumnOriented(RowOriented),
-                                                                        maxData(RowOriented ? left.getData().getRows() : 1,
-                                                                                RowOriented ? 1 : left.getData().getCols()),
-                                                                        normalizedData(RowOriented ? left.getData().getRows() : left.getData().getCols(),
-                                                                                       RowOriented ? left.getData().getCols() : left.getData().getRows()) {
+                                                                        Es(rowOriented ? left.getData().getRows() : 1,
+                                                                           rowOriented ? 1 : left.getData().getCols()),
+                                                                        RowOriented(rowOriented),
+                                                                        maxData(rowOriented ? left.getData().getRows() : 1,
+                                                                                rowOriented ? 1 : left.getData().getCols()),
+                                                                        normalizedData(rowOriented ? left.getData().getRows() : left.getData().getCols(),
+                                                                                       rowOriented ? left.getData().getCols() : left.getData().getRows()) {
 
 }

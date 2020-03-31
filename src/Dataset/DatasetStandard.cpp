@@ -64,9 +64,9 @@ DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 tes
         file.read(reinterpret_cast<char *>(data.data()), dataSize * outputs * sizeof(f32));
         for (size_t i = 0; i < trainSamples; ++i)
             train_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
-        for (size_t i = 0; i < validationSamples; ++i)
-            validation_inputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
-        for (size_t i = trainSamples; i < trainSamples + testSamples; ++i)
+        for (size_t i = trainSamples; i < trainSamples + validationSamples; ++i)
+            validation_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
+        for (size_t i = trainSamples + validationSamples; i < trainSamples + validationSamples + testSamples; ++i)
             test_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
     }
     std::cout <<
@@ -78,19 +78,20 @@ DatasetStandard::DatasetStandard(std::ifstream &&file, size_t batchSize, f32 tes
               "Unused size: " << (dataSize - (trainSamples + validationSamples + testSamples) * batchSize) << std::endl;
 }
 
-std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample() {
-    ++currentTrainSample;
+std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample(bool moveCursor) {
     if (currentTrainSample >= train_inputs.size())
-        currentTrainSample = -1;
+        currentTrainSample = 0;
+    if (moveCursor)
+        ++currentTrainSample;
     return {train_inputs[currentTrainSample], train_outputs[currentTrainSample]};
 }
 
-std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTestSample() {
-    ++currentTestSample;
-    if (currentTestSample >= test_inputs.size())
-        currentTestSample = -1;
-    return {test_inputs[currentTestSample], test_outputs[currentTestSample]};
+std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetStandard::GetTestSamples() {
+    return {test_inputs, test_outputs};
+}
 
+std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetStandard::GetValidationSamples() {
+    return {validation_inputs, validation_outputs};
 }
 
 u32 DatasetStandard::GetInputs() const {
@@ -101,9 +102,6 @@ u32 DatasetStandard::GetOutputs() const {
     return outputs;
 }
 
-std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetValidationSample() {
-    ++currentValidationSample;
-    if (currentValidationSample >= test_inputs.size())
-        currentValidationSample = -1;
-    return {test_inputs[currentValidationSample], test_outputs[currentValidationSample]};
+u32 DatasetStandard::GetBatchSize() const {
+    return batchSize;
 }

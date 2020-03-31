@@ -7,19 +7,22 @@
 #include "../Layer/Abstract/Layer.h"
 
 class ClassificationNN : public NeuralNetwork {
-    Dataset& DataSet;
+    Dataset &DataSet;
 
     std::vector<std::shared_ptr<Layer>> Layers;
     std::vector<std::shared_ptr<Layer>> WeightsLayers;
     std::shared_ptr<Layer> LossFunction;
+    std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> AccuracyLayer;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> IO;
-
-    std::map<char,std::shared_ptr<Matrix2D>> HyperParams;
+    void FollowPropagation(Layer *stop_layer = nullptr);
+    void BackPropagation();
+    std::map<char, std::shared_ptr<Matrix2D>> HyperParams;
 
     explicit ClassificationNN(std::vector<u32> &&layers, Dataset &dataset);
+    f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);
     void ModifyParam(char param_name, f32 value) override;
-    f32 GetAccuracy() override;
-    void Train(u64 steps) override;
+    f32 Test() override;
+    f32 Train(u64 steps) override;
 public:
     template<class... Args>
     explicit ClassificationNN(Dataset &dataset, Args &&... args): ClassificationNN({std::forward<Args>(args)...}, dataset) {

@@ -211,3 +211,37 @@ void Matrix2D::Print() const {
 void Matrix2D::AssignData(f32 *src) {
     memcpy(data.data(), src, rows * cols * sizeof(f32));
 }
+
+
+void Matrix2D::FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad) {
+    f32 found_value;
+    size_t found_index;
+    for (size_t j = 0; j < getCols(); ++j) {
+        found_value = neutralValue;
+        found_index = -1;
+        for (size_t i = 0; i < getRows(); ++i)
+            if (functor(left(i, j), found_value)) {
+                found_value = left(i, j);
+                found_index = i;
+            }
+        for (size_t i = 0; i < getRows(); ++i)
+            setCell(i, j, (grad == nullptr ? 1.f : (*grad)(i, j)) * (i == found_index ? 1.f : 0.f));
+    }
+}
+
+void Matrix2D::FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad) {
+    f32 found_value;
+    size_t found_index;
+    for (size_t i = 0; i < getRows(); ++i) {
+        found_value = neutralValue;
+        found_index = -1;
+        for (size_t j = 0; j < getCols(); ++j)
+            if (functor(left(i, j), found_value)) {
+                found_value = left(i, j);
+                found_index = j;
+            }
+        for (size_t j = 0; j < getCols(); ++j)
+            setCell(i, j, (grad == nullptr ? 1.f : (*grad)(i, j)) * (j == found_index ? 1.f : 0.f));
+    }
+
+}

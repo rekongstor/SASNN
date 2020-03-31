@@ -50,7 +50,9 @@ int main(s32 argc, const s8 *argv[]) {
     ClassificationNN classificationNn(datasetStandard, 1u, 15u);
 
     NeuralNetwork &NN = classificationNn;
-
-    NN.Train(500);
+    NN.ModifyParam('g', 0.00001f);
+    NN.ModifyParam('l', 1.f);
+    for (int i = 0; i < 10; ++i)
+        std::cout << NN.Train(1) << std::endl;
     return 0;
 }
