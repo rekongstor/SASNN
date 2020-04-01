@@ -53,10 +53,10 @@ int main(int argc, const char *argv[]) {
     Dataset &dataset = datasetStandard;
     dataset.PreprocessMean();
     NeuralNetwork &NN = classificationNn;
-    NN.ModifyParam('g', 0.0001f);
+    NN.ModifyParam('g', 0.01f);
     NN.ModifyParam('l', 50.f);
     for (int i = 0; i < 100; ++i)
-        std::cout << NN.Train(20) << std::endl;
+        std::cout << NN.Train(2) << std::endl;
     std::cout << "Test: " << NN.Test() << std::endl;
     NN.Serialize("nn.txt");
     system("pause");
