@@ -7,7 +7,6 @@
 class GradientDescentRMSProp : public DecoratorGradientDescent {
     Matrix2D learningRate;
     std::shared_ptr<Matrix2D> accumulated;
-    std::shared_ptr<Matrix2D> adaptiveLearningRate;
     Matrix2D rho;
 public:
     explicit GradientDescentRMSProp(f32 rho = 0.9f);
