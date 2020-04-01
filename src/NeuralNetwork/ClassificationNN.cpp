@@ -26,8 +26,7 @@ f32 ClassificationNN::Test() {
     return GetAccuracy(DataSet.GetTestSamples());
 }
 
-f32 ClassificationNN::Train(u64 steps) {
-    f32 acc = GetAccuracy(DataSet.GetValidationSamples());;
+std::pair<f32, f32> ClassificationNN::Train(u64 steps) {
     for (u64 i = 0; i < steps; ++i) {
         // Load next batch
         auto[Inputs, Outputs] = IO;
@@ -40,7 +39,8 @@ f32 ClassificationNN::Train(u64 steps) {
         GradientDescent();
         ClearGradients();
     }
-    return acc;
+
+    return {GetAccuracy(DataSet.GetTrainSample(false)), GetAccuracy(DataSet.GetValidationSample(true))};
 }
 
 ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) : DataSet(dataset) {
@@ -57,16 +57,6 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
     // Setting hyper-parameter layers
     auto L2RegParam = ADD_LAYER(new LayerData(*HyperParams['l']));
     // Setting FullyConnected architecture
-//    auto Weights = ADD_LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(),
-//                             SP_CAST(DecoratorInitializer, InitializerXavier, static_cast<f32>(dataset.GetInputs())),
-//                             SP_CAST(DecoratorGradientDescent, GradientDescentStochastic));
-//
-//    Layers.emplace_back(std::dynamic_pointer_cast<Layer>(std::make_shared<LayerWeights>(
-//            dataset.GetInputs(), dataset.GetOutputs(),
-//            std::dynamic_pointer_cast<DecoratorInitializer>(std::make_shared<InitializerXavier>(static_cast<f32>(dataset.GetInputs()))),
-//            std::dynamic_pointer_cast<DecoratorGradientDescent>(std::make_shared<GradientDescentStochastic>())
-//    )));
-
     auto Weights = ADD_LAYER(new LayerWeights(dataset.GetInputs(), dataset.GetOutputs(), new InitializerXavier(static_cast<f32>(dataset.GetInputs())), new GradientDescentAdam));
 
     WeightsLayers.emplace_back(Weights);
@@ -105,6 +95,19 @@ f32 ClassificationNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const
     accuracy /= static_cast<f32>(DataSet.GetBatchSize() * inputs.size());
     return accuracy;
 }
+
+f32 ClassificationNN::GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample) {
+    auto[inputs, outputs] = sample;
+    auto[Inputs, Outputs] = IO;
+    Inputs->assignData(&inputs);
+    Outputs->assignData(&outputs);
+    ForwardPropagation(AccuracyLayer.second.get());
+    AccuracyLayer.first->followProp();
+    f32 accuracy = AccuracyLayer.first->getData()(0, 0);
+    accuracy /= static_cast<f32>(DataSet.GetBatchSize());
+    return accuracy;
+}
+
 
 void ClassificationNN::ForwardPropagation(Layer *stop_layer) {
     // Forward propagation

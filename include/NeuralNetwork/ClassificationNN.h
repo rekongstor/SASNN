@@ -22,9 +22,10 @@ class ClassificationNN : public NeuralNetwork {
 
     explicit ClassificationNN(std::vector<u32> &&layers, Dataset &dataset);
     f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);
+    f32 GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample);
     void ModifyParam(char param_name, f32 value) override;
     f32 Test() override;
-    f32 Train(u64 steps) override;
+    std::pair<f32, f32> Train(u64 steps) override;
 public:
     template<class... Args>
     explicit ClassificationNN(Dataset &dataset, Args &&... args): ClassificationNN({std::forward<Args>(args)...}, dataset) {

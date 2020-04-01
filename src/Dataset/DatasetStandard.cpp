@@ -115,6 +115,14 @@ std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample(bo
     return {train_inputs[currentTrainSample], train_outputs[currentTrainSample]};
 }
 
+std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetValidationSample(bool moveCursor) {
+    if (moveCursor)
+        ++currentValSample;
+    if (currentValSample >= validation_inputs.size())
+        currentValSample = 0;
+    return {validation_inputs[currentValSample], validation_outputs[currentValSample]};
+}
+
 std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetStandard::GetTestSamples() {
     return {test_inputs, test_outputs};
 }
@@ -134,3 +142,4 @@ u32 DatasetStandard::GetOutputs() const {
 u32 DatasetStandard::GetBatchSize() const {
     return batchSize;
 }
+
