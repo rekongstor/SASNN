@@ -1,6 +1,7 @@
 #include "../../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentMomentum.h"
 
-void GradientDescentMomentum::subGrad(Matrix2D &weights, const Matrix2D &grad) {
+void GradientDescentMomentum::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
+    learningRate.setCell(0, 0, step);
     if (!velocity)
         velocity = std::make_shared<Matrix2D>(grad.getRows(), grad.getCols());
 
@@ -12,5 +13,6 @@ void GradientDescentMomentum::subGrad(Matrix2D &weights, const Matrix2D &grad) {
     });
 }
 
-GradientDescentMomentum::GradientDescentMomentum(f32 velocity) : momentum(velocity) {}
+GradientDescentMomentum::GradientDescentMomentum(f32 velocity) : momentum(velocity),
+                                                                 learningRate(1, 1) {}
 

@@ -13,7 +13,6 @@ class LayerWeights : public LayerDynamic {
     void assignData(const Matrix2D *d) override;
     void subGrad(f32 step) override;
     void clearGrad() override;
-    Matrix2D gradLength;
     std::shared_ptr<DecoratorGradientDescent> gradientDescent;
     std::shared_ptr<DecoratorInitializer> initializer;
 public:
