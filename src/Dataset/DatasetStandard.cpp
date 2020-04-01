@@ -89,6 +89,24 @@ DatasetStandard::DatasetStandard(const char* filename, size_t batchSize, f32 tes
               "Unused size: " << (dataSize - (trainSamples + validationSamples + testSamples) * batchSize) << std::endl;
 }
 
+void DatasetStandard::PreprocessMean()
+{
+    Matrix2D meanMatrix(batchSize, 1);
+    for (auto set : { &train_inputs, &validation_inputs, &test_inputs }) {
+        for (auto& sample : *set)
+        {
+            meanMatrix.MergeColsOperator(sample, [](const f32 l, const f32 r) ->f32 {
+                return l + r;
+                });
+            for (size_t i = 0; i < batchSize; ++i)
+                meanMatrix.setCell(i, 0, meanMatrix(i, 0) / static_cast<f32>(inputs));
+            sample.ColOperator(sample, meanMatrix, [](const f32 l, const f32 r) -> f32 {
+                return l - r;
+                });
+        }
+    }
+}
+
 std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample(bool moveCursor) {
     if (moveCursor)
         ++currentTrainSample;

@@ -50,11 +50,14 @@ int main(int argc, const char *argv[]) {
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
     ClassificationNN classificationNn(datasetStandard, 16u, 16u);
 
+    Dataset &dataset = datasetStandard;
+    dataset.PreprocessMean();
     NeuralNetwork &NN = classificationNn;
     NN.ModifyParam('g', 0.01f);
     NN.ModifyParam('l', 50.f);
-    for (int i = 0; i < 50; ++i)
+    for (int i = 0; i < 100; ++i)
         std::cout << NN.Train(20) << std::endl;
+    std::cout << "Test: " << NN.Test() << std::endl;
     NN.Serialize("nn.txt");
     system("pause");
     return 0;

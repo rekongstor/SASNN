@@ -24,6 +24,7 @@ class DatasetStandard : public Dataset {
     [[nodiscard]] u32 GetInputs() const override;
     [[nodiscard]] u32 GetOutputs() const override;
     [[nodiscard]] u32 GetBatchSize() const override;
+    virtual void PreprocessMean() override;
 public:
     explicit DatasetStandard(const char* filename, size_t batchSize, f32 testCoef, f32 validationCoef);
 };
