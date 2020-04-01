@@ -65,11 +65,21 @@ void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, con
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j), extra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j), extra(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
             else
-                (*this).setCell(i, j, functor(left(i, j), right(i, j), extra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+                (*this).setCell(i, j, functor(left(i, j), right(i, j), extra(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
+
+void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, const Matrix2D &extra, const Matrix2D &tetra, f32 (*functor)(const f32, const f32, const f32, const f32),
+                                const Matrix2D *multiplier) {
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            if (incremental)
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j), extra(i, j), tetra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+            else
+                (*this).setCell(i, j, functor(left(i, j), right(i, j), extra(i, j), tetra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+}
 
 void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
@@ -158,8 +168,7 @@ void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
     s64 j_max = right.getCols();
     s64 k_max = left.getCols();
 #pragma omp parallel for default (none) shared(i_max, j_max, k_max, left, right)
-    for (s64 i = 0; i < i_max; ++i)
-    {
+    for (s64 i = 0; i < i_max; ++i) {
         for (size_t j = 0; j < j_max; ++j) {
             f32 tmp = 0.f;
             for (size_t k = 0; k < k_max; ++k)
