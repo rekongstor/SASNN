@@ -35,6 +35,13 @@ public:
      */
     void EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr);
     /**
+     * Performs ternary functor on the corresponding cell
+     * @param left : [rows x cols]
+     * @param right : [rows x cols]
+     * @param extra : [rows x cols]
+     */
+    void EachCellOperator(const Matrix2D &left, const Matrix2D &right, const Matrix2D &extra, f32 (*functor)(const f32, const f32, const f32), const Matrix2D *multiplier = nullptr);
+    /**
      * Performs binary functor on the each row
      * @param left [rows x cols]
      * @param right [1 x cols]

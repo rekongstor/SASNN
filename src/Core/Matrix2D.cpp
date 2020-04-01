@@ -60,6 +60,17 @@ void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32
                 (*this).setCell(i, j, functor(left(i, j), right(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
+
+void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, const Matrix2D &extra, f32 (*functor)(const f32, const f32, const f32), const Matrix2D *multiplier) {
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            if (incremental)
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j), extra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+            else
+                (*this).setCell(i, j, functor(left(i, j), right(i, j), extra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+}
+
+
 void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)

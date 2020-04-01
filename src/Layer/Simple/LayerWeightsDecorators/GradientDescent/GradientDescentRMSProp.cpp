@@ -1,13 +1,13 @@
 #include <cmath>
-#include "../../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentAdaGrad.h"
+#include "../../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentRMSProp.h"
 
-void GradientDescentAdaGrad::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
+void GradientDescentRMSProp::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
     if (!accumulated)
         accumulated = std::make_shared<Matrix2D>(grad.getRows(), grad.getCols());
     if (!adaptiveLearningRate)
         adaptiveLearningRate = std::make_shared<Matrix2D>(grad.getRows(), grad.getCols());
     learningRate.setCell(0, 0, step);
-
+    
     accumulated->EachCellOperator(*accumulated, grad, [](const f32 l, const f32 r) -> f32 {
         return l + r * r;
     });
@@ -22,4 +22,4 @@ void GradientDescentAdaGrad::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step
     });
 }
 
-GradientDescentAdaGrad::GradientDescentAdaGrad() : learningRate(1, 1) {}
+GradientDescentRMSProp::GradientDescentRMSProp(f32 rho) : learningRate(1, 1), rho(rho) {}
