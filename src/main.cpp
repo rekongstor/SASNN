@@ -53,13 +53,14 @@ int main(int argc, const char *argv[]) {
     Dataset &dataset = datasetStandard;
     dataset.PreprocessMean();
     NeuralNetwork &NN = classificationNn;
-    NN.ModifyParam('g', 0.0002f);
-    NN.ModifyParam('l', 50.f);
-    for (int i = 0; i < 1000; ++i) {
-        auto[train_acc, val_acc] = NN.Train(10);
-        printf("Accuracy T/V: [%.3f]/[%.3f] Diff: %.3f\n", train_acc, val_acc, train_acc-val_acc);
+    NN.ModifyParam('g', 0.0001f);
+    NN.ModifyParam('l', 40.f);
+    for (int i = 0; i < 100; ++i) {
+        auto[train_acc, val_acc] = NN.Train();
+        printf("Accuracy Train/Validation: [%.2f]/[%.2f] Diff: %.2f\n", train_acc, val_acc, train_acc-val_acc);
     }
-    std::cout << "Test: " << NN.Test() << std::endl;
+    auto[val_acc, test_acc] = NN.Test();
+    printf("Accuracy Validation/Test: [%.2f]/[%.2f] Diff: %.2f\n", val_acc, test_acc, val_acc-test_acc);
     NN.Serialize("nn.txt");
     system("pause");
     return 0;

@@ -7,6 +7,7 @@ void GradientDescentAdam::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
     if (!accumulated)
         accumulated = std::make_shared<Matrix2D>(grad.getRows(), grad.getCols());
 
+    learningRate.setCell(0, 0, step);
     velocity->EachCellOperator(*velocity, grad, momentum, [](const f32 v, const f32 g, const f32 m) -> f32 {
         return m * v + (1.f - m) * g;
     });
@@ -16,7 +17,6 @@ void GradientDescentAdam::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
     weights.EachCellOperator(weights, *velocity, learningRate, *accumulated, [](const f32 w, const f32 v, const f32 l, const f32 a) -> f32 {
         return w - l / sqrt(a) * v;
     });
-    learningRate.setCell(0, 0, step);
 }
 
 

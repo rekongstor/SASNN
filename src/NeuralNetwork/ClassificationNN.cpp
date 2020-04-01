@@ -20,14 +20,15 @@
 
 #define ADD_LAYER(Type, ...) Layers.emplace_back( Type )
 #define ADD_PARAM(Param, Value) HyperParams.emplace( Param , std::make_shared<Matrix2D>( Value ))
+#define GET_PARAM(Param) (*HyperParams[ Param ])(0, 0)
 
 
-f32 ClassificationNN::Test() {
-    return GetAccuracy(DataSet.GetTestSamples());
+std::pair<f32, f32> ClassificationNN::Test() {
+    return {GetAccuracy(DataSet.GetValidationSamples()),GetAccuracy(DataSet.GetTestSamples())};
 }
 
-std::pair<f32, f32> ClassificationNN::Train(u64 steps) {
-    for (u64 i = 0; i < steps; ++i) {
+std::pair<f32, f32> ClassificationNN::Train() {
+    for (u64 i = 0; i < roundf(GET_PARAM('s')); ++i) {
         // Load next batch
         auto[Inputs, Outputs] = IO;
         auto[train_inputs, train_outputs] = DataSet.GetTrainSample(true);
@@ -45,8 +46,9 @@ std::pair<f32, f32> ClassificationNN::Train(u64 steps) {
 
 ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
-    ADD_PARAM('l', 1.f);
-    ADD_PARAM('g', 1.f);
+    ADD_PARAM('l', 0.0001f);
+    ADD_PARAM('g', 75.f);
+    ADD_PARAM('s', 10.f);
 
     // Setting dataset layers
     auto[train_inputs, train_outputs] = DataSet.GetTrainSample(false);
@@ -134,7 +136,7 @@ void ClassificationNN::ClearGradients() {
 void ClassificationNN::GradientDescent() {
     // Perform gradient descent
     for (auto &Weight : WeightsLayers)
-        Weight->subGrad((*HyperParams['g'])(0, 0));
+        Weight->subGrad(GET_PARAM('g'));
 }
 
 void ClassificationNN::Serialize(const char *filename) {
