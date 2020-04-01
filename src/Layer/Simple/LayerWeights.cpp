@@ -31,9 +31,7 @@ void LayerWeights::subGrad(f32 step) {
     });
 
     // Gradient Descent
-    data.EachCellOperator(data, grad, [](const f32 l, const f32 r) -> f32 {
-        return l - r;
-    });
+    gradientDescent->subGrad(data, grad);
 }
 
 void LayerWeights::assignData(const Matrix2D *d) {
