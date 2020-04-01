@@ -51,10 +51,10 @@ int main(int argc, const char *argv[]) {
     ClassificationNN classificationNn(datasetStandard, 16u, 16u);
 
     NeuralNetwork &NN = classificationNn;
-    NN.ModifyParam('g', 0.1f);
+    NN.ModifyParam('g', 0.01f);
     NN.ModifyParam('l', 50.f);
     for (int i = 0; i < 50; ++i)
-        std::cout << NN.Train(10) << std::endl;
+        std::cout << NN.Train(20) << std::endl;
     NN.Serialize("nn.txt");
     system("pause");
     return 0;

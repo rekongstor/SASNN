@@ -146,8 +146,9 @@ void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
     s64 i_max = left.getRows();
     s64 j_max = right.getCols();
     s64 k_max = left.getCols();
-#pragma omp parallel for default (none) shared(i_max, j_max, k_max, left)
+#pragma omp parallel for default (none) shared(i_max, j_max, k_max, left, right)
     for (s64 i = 0; i < i_max; ++i)
+    {
         for (size_t j = 0; j < j_max; ++j) {
             f32 tmp = 0.f;
             for (size_t k = 0; k < k_max; ++k)
@@ -157,6 +158,7 @@ void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
             else
                 (*this).setCell(i, j, tmp);
         }
+    }
 }
 
 

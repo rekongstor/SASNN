@@ -90,10 +90,10 @@ DatasetStandard::DatasetStandard(const char* filename, size_t batchSize, f32 tes
 }
 
 std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample(bool moveCursor) {
-    if (currentTrainSample >= train_inputs.size())
-        currentTrainSample = 0;
     if (moveCursor)
         ++currentTrainSample;
+    if (currentTrainSample >= train_inputs.size())
+        currentTrainSample = 0;
     return {train_inputs[currentTrainSample], train_outputs[currentTrainSample]};
 }
 
