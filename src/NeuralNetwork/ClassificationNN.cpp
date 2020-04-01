@@ -21,6 +21,7 @@ f32 ClassificationNN::Test() {
 }
 
 f32 ClassificationNN::Train(u64 steps) {
+    f32 acc = GetAccuracy(DataSet.GetValidationSamples());;
     for (u64 i = 0; i < steps; ++i) {
         // Load next batch
         auto[Inputs, Outputs] = IO;
@@ -29,19 +30,9 @@ f32 ClassificationNN::Train(u64 steps) {
         Outputs->assignData(&train_outputs);
 
         ForwardPropagation();
-        std::cout << "Loss: " << LossFunction->getData()(0, 0);
         BackPropagation();
-        ForwardPropagation();
-        std::cout << " : " << LossFunction->getData()(0, 0) << std::endl;
 
     }
-    std::ofstream out("nn.txt");
-    auto &a = WeightsLayers[0]->getData();
-    for (size_t i = 0; i < a.getCols(); ++i)
-        for (size_t j = 0; j < a.getRows(); ++j)
-            out << a(j, i) << std::endl;
-    out.close();
-    f32 acc = GetAccuracy(DataSet.GetValidationSamples());;
     return acc;
 }
 
@@ -60,8 +51,8 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
     auto L2RegParam = LAYER(LayerData, *HyperParams['l']);
 
     // Setting FullyConnected architecture
-    //auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(), static_cast<f32>(dataset.GetInputs())); // [inputs x outputs]
-    auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs()); // [inputs x outputs]
+    auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(), static_cast<f32>(dataset.GetInputs())); // [inputs x outputs]
+    //auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs()); // [inputs x outputs]
     WeightsLayers.emplace_back(Weights);
     auto FullyConnected = LAYER(LayerFullyConnected, *Input, *Weights); // [batch_size x outputs]
 

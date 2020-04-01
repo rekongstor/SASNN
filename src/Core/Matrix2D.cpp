@@ -139,7 +139,6 @@ void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32
     for (size_t j = 1; j < left.getCols(); ++j)
         tmp = functor(tmp, left(0, j));
 
-#pragma omp parallel for
     for (s64 i = 1; i < left.getRows(); ++i)
         for (size_t j = 0; j < left.getCols(); ++j)
             tmp = functor(tmp, left(i, j));
