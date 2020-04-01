@@ -1,9 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 project(SASNN)
 
+find_package(OpenMP REQUIRED)
+
 set(CMAKE_CXX_STANDARD 17)
 if (DEBUG_LEVEL)
     add_definitions(-DDEBUG_LEVEL=${DEBUG_LEVEL})
 endif()
 
 add_executable(SASNN src/main.cpp src/Core/Matrix2D.cpp include/Core/Matrix2D.h include/stdafx.h src/Dataset/DatasetStandard.cpp include/Dataset/DatasetStandard.h include/Layer/Abstract/Layer.h src/Layer/Simple/LayerData.cpp include/Layer/Simple/LayerData.h src/Layer/Simple/LayerWeights.cpp include/Layer/Simple/LayerWeights.h src/Core/Random.cpp include/Core/Random.h include/NeuralNetwork/NeuralNetwork.h src/Layer/Functional/LayerFullyConnected.cpp include/Layer/Functional/LayerFullyConnected.h src/Layer/Abstract/Layer.cpp src/Layer/Abstract/LayerDynamic.cpp include/Layer/Abstract/LayerDynamic.h src/Layer/NLF/LayerReLU.cpp include/Layer/NLF/LayerReLU.h src/Layer/NLF/LayerLeakyReLU.cpp include/Layer/NLF/LayerLeakyReLU.h src/Layer/NLF/LayerSigmoid.cpp include/Layer/NLF/LayerSigmoid.h src/Layer/NLF/LayerTanh.cpp include/Layer/NLF/LayerTanh.h src/Layer/Functional/LayerExp.cpp include/Layer/Functional/LayerExp.h src/Layer/Functional/LayerStableSoftMax.cpp include/Layer/Functional/LayerStableSoftMax.h src/Layer/Functional/LayerLog.cpp include/Layer/Functional/LayerLog.h src/Layer/Functional/LayerCrossEntropyLoss.cpp include/Layer/Functional/LayerCrossEntropyLoss.h src/NeuralNetwork/ClassificationNN.cpp include/NeuralNetwork/ClassificationNN.h src/Layer/Functional/LayerL2Reg.cpp include/Layer/Functional/LayerL2Reg.h src/Layer/Functional/LayerSum.cpp include/Layer/Functional/LayerSum.h src/Layer/Accuracy/LayerClassificationAccuracy.cpp include/Layer/Accuracy/LayerClassificationAccuracy.h)
+
+target_compile_options(SASNN PRIVATE -Wall ${OpenMP_CXX_FLAGS})
+target_link_libraries(SASNN PRIVATE ${OpenMP_CXX_FLAGS})

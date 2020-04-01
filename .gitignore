@@ -3,4 +3,4 @@
 /.idea/
 /CMakeSettings.json
 /.vs
-/out/build/x64-Debug
+/out/*

@@ -43,7 +43,8 @@ size_t Matrix2D::getCols() const {
 }
 
 void Matrix2D::EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const Matrix2D *grad) {
-    for (size_t i = 0; i < rows; ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
                 (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
@@ -52,7 +53,8 @@ void Matrix2D::EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const
 }
 
 void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
-    for (size_t i = 0; i < rows; ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
                 (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
@@ -61,7 +63,8 @@ void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32
 }
 
 void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
-    for (size_t i = 0; i < rows; ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
                 (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(0, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
@@ -70,7 +73,8 @@ void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*fu
 }
 
 void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
-    for (size_t i = 0; i < rows; ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
                 (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, 0)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
@@ -79,7 +83,8 @@ void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*fu
 }
 
 void Matrix2D::CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
-    for (size_t i = 0; i < rows; ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
                 (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(0, 0)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
@@ -89,7 +94,8 @@ void Matrix2D::CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*f
 
 
 void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
-    for (size_t j = 0; j < cols; ++j) {
+#pragma omp parallel for
+    for (s64 j = 0; j < cols; ++j) {
         f32 tmp;
         if (initFunctor == nullptr)
             tmp = left(0, j);
@@ -106,7 +112,8 @@ void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32,
 }
 
 void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
-    for (size_t i = 0; i < rows; ++i) {
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i) {
         f32 tmp;
         if (initFunctor == nullptr)
             tmp = left(i, 0);
@@ -132,7 +139,8 @@ void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32
     for (size_t j = 1; j < left.getCols(); ++j)
         tmp = functor(tmp, left(0, j));
 
-    for (size_t i = 1; i < left.getRows(); ++i)
+#pragma omp parallel for
+    for (s64 i = 1; i < left.getRows(); ++i)
         for (size_t j = 0; j < left.getCols(); ++j)
             tmp = functor(tmp, left(i, j));
 
@@ -143,7 +151,8 @@ void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32
 }
 
 void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
-    for (size_t i = 0; i < left.getRows(); ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < left.getRows(); ++i)
         for (size_t j = 0; j < right.getCols(); ++j) {
             f32 tmp = 0.f;
             for (size_t k = 0; k < left.getCols(); ++k)
@@ -161,13 +170,15 @@ void Matrix2D::Transpose() {
 }
 
 void Matrix2D::Clean() {
-    for (size_t i = 0; i < rows; ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             (*this).setCell(i, j, 0.f);
 }
 
 void Matrix2D::Fill(f32 value) {
-    for (size_t i = 0; i < rows; ++i)
+#pragma omp parallel for
+    for (s64 i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             (*this).setCell(i, j, value);
 }
@@ -216,7 +227,8 @@ void Matrix2D::AssignData(f32 *src) {
 void Matrix2D::FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad) {
     f32 found_value;
     size_t found_index;
-    for (size_t j = 0; j < getCols(); ++j) {
+#pragma omp parallel for
+    for (s64 j = 0; j < getCols(); ++j) {
         found_value = neutralValue;
         found_index = -1;
         for (size_t i = 0; i < getRows(); ++i)
@@ -232,7 +244,8 @@ void Matrix2D::FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*fu
 void Matrix2D::FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad) {
     f32 found_value;
     size_t found_index;
-    for (size_t i = 0; i < getRows(); ++i) {
+#pragma omp parallel for
+    for (s64 i = 0; i < getRows(); ++i) {
         found_value = neutralValue;
         found_index = -1;
         for (size_t j = 0; j < getCols(); ++j)

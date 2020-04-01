@@ -28,8 +28,12 @@ f32 ClassificationNN::Train(u64 steps) {
         Inputs->assignData(&train_inputs);
         Outputs->assignData(&train_outputs);
 
-        FollowPropagation();
+        ForwardPropagation();
+        std::cout << "Loss: " << LossFunction->getData()(0, 0);
         BackPropagation();
+        ForwardPropagation();
+        std::cout << " : " << LossFunction->getData()(0, 0) << std::endl;
+
     }
     std::ofstream out("nn.txt");
     auto &a = WeightsLayers[0]->getData();
@@ -87,7 +91,7 @@ f32 ClassificationNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const
         auto[Inputs, Outputs] = IO;
         Inputs->assignData(&inputs[i]);
         Outputs->assignData(&outputs[i]);
-        FollowPropagation(AccuracyLayer.second.get());
+        ForwardPropagation(AccuracyLayer.second.get());
         AccuracyLayer.first->followProp();
         accuracy += AccuracyLayer.first->getData()(0, 0);
     }
@@ -95,7 +99,7 @@ f32 ClassificationNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const
     return accuracy;
 }
 
-void ClassificationNN::FollowPropagation(Layer *stop_layer) {
+void ClassificationNN::ForwardPropagation(Layer *stop_layer) {
     // Forward propagation
     for (auto &Layer : Layers) {
         Layer->followProp();

@@ -14,7 +14,7 @@ class ClassificationNN : public NeuralNetwork {
     std::shared_ptr<Layer> LossFunction;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> AccuracyLayer;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> IO;
-    void FollowPropagation(Layer *stop_layer = nullptr);
+    void ForwardPropagation(Layer *stop_layer = nullptr);
     void BackPropagation();
     std::map<char, std::shared_ptr<Matrix2D>> HyperParams;
 
