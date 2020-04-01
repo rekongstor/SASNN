@@ -49,26 +49,35 @@ DatasetStandard::DatasetStandard(const char* filename, size_t batchSize, f32 tes
     testSamples /= batchSize;
     trainSamples /= batchSize;
     validationSamples /= batchSize;
+    size_t train_start = 0, train_end = trainSamples;
+    size_t validation_start = trainSamples, validation_end = validation_start + validationSamples;
+    size_t test_start = validation_end, test_end = test_start + testSamples;
     if (testSamples <= 0 || trainSamples <= 0)
         throw std::runtime_error("Data size cannot be negative or zero");
     {
         std::vector<f32> data(dataSize * inputs);
         file.read(reinterpret_cast<char *>(data.data()), dataSize * inputs * sizeof(f32));
-        for (size_t i = 0; i < trainSamples; ++i)
+
+        for (size_t i = train_start; i < train_end; ++i)
             train_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
-        for (size_t i = 0; i < validationSamples; ++i)
+
+        for (size_t i = validation_start; i < validation_end; ++i)
             validation_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
-        for (size_t i = trainSamples; i < trainSamples + testSamples; ++i)
+
+        for (size_t i = test_start; i < test_end; ++i)
             test_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
     }
     {
         std::vector<f32> data(dataSize * static_cast<u64>(outputs));
         file.read(reinterpret_cast<char *>(data.data()), dataSize * static_cast<u64>(outputs) * sizeof(f32));
-        for (size_t i = 0; i < trainSamples; ++i)
+
+        for (size_t i = train_start; i < train_end; ++i)
             train_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
-        for (size_t i = trainSamples; i < trainSamples + validationSamples; ++i)
+
+        for (size_t i = validation_start; i < validation_end; ++i)
             validation_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
-        for (size_t i = trainSamples + validationSamples; i < trainSamples + validationSamples + testSamples; ++i)
+
+        for (size_t i = test_start; i < test_end; ++i)
             test_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
     }
     std::cout <<

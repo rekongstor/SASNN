@@ -48,11 +48,11 @@ int main(int argc, const char *argv[]) {
 
 
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    ClassificationNN classificationNn(datasetStandard, 1u, 15u);
+    ClassificationNN classificationNn(datasetStandard, 16u, 16u);
 
     NeuralNetwork &NN = classificationNn;
-    NN.ModifyParam('g', .0001f);
-    NN.ModifyParam('l', -1000000.f);
+    NN.ModifyParam('g', 0.1f);
+    NN.ModifyParam('l', 75.f);
     for (int i = 0; i < 100; ++i)
         std::cout << NN.Train(1) << std::endl;
     system("pause");

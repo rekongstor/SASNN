@@ -6,19 +6,19 @@ void LayerStableSoftMax::followProp() {
     auto Data_functor = RowOriented ? &Matrix2D::ColOperator : &Matrix2D::RowOperator;
     (maxData.*Merge_functor)(left.getData(), [](const f32 l, const f32 r) -> f32 {
         return fmaxf(l, r);
-    }, nullptr, nullptr);
+        }, nullptr, nullptr);
     (normalizedData.*Data_functor)(left.getData(), maxData, [](const f32 l, const f32 r) -> f32 {
         return l - r;
-    }, nullptr);
+        }, nullptr);
 
     (Es.*Merge_functor)(normalizedData, [](const f32 l, const f32 r) -> f32 {
         return l + expf(r);
-    }, nullptr, [](const f32 l) -> f32 {
-        return expf(l);
-    });
+        }, nullptr, [](const f32 l) -> f32 {
+            return expf(l);
+        });
     (data.*Data_functor)(normalizedData, Es, [](const f32 l, const f32 r) -> f32 {
-        return exp(l) / r;
-    }, nullptr);
+        return expf(l) / r;
+        }, nullptr);
 }
 
 void LayerStableSoftMax::backProp() {
