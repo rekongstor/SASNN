@@ -42,53 +42,53 @@ size_t Matrix2D::getCols() const {
     return cols;
 }
 
-void Matrix2D::EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const Matrix2D *grad) {
+void Matrix2D::EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
             else
-                (*this).setCell(i, j, functor(left(i, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, functor(left(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
-void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
             else
-                (*this).setCell(i, j, functor(left(i, j), right(i, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, functor(left(i, j), right(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
-void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(0, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(0, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
             else
-                (*this).setCell(i, j, functor(left(i, j), right(0, j)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, functor(left(i, j), right(0, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
-void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, 0)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, 0)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
             else
-                (*this).setCell(i, j, functor(left(i, j), right(i, 0)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, functor(left(i, j), right(i, 0)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
-void Matrix2D::CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(0, 0)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(0, 0)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
             else
-                (*this).setCell(i, j, functor(left(i, j), right(0, 0)) * (grad == nullptr ? 1.f : (*grad)(i, j)));
+                (*this).setCell(i, j, functor(left(i, j), right(0, 0)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
 
-void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
+void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier, f32(*initFunctor)(const f32)) {
     for (size_t j = 0; j < cols; ++j) {
         f32 tmp;
         if (initFunctor == nullptr)
@@ -99,13 +99,13 @@ void Matrix2D::MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32,
         for (size_t i = 1; i < left.getRows(); ++i)
             tmp = functor(tmp, left(i, j));
         if (incremental)
-            (*this).setCell(0, j, (*this)(0, j) + tmp * (grad == nullptr ? 1.f : (*grad)(0, j)));
+            (*this).setCell(0, j, (*this)(0, j) + tmp * (multiplier == nullptr ? 1.f : (*multiplier)(0, j)));
         else
-            (*this).setCell(0, j, tmp * (grad == nullptr ? 1.f : (*grad)(0, j)));
+            (*this).setCell(0, j, tmp * (multiplier == nullptr ? 1.f : (*multiplier)(0, j)));
     }
 }
 
-void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
+void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier, f32(*initFunctor)(const f32)) {
     for (size_t i = 0; i < rows; ++i) {
         f32 tmp;
         if (initFunctor == nullptr)
@@ -116,13 +116,13 @@ void Matrix2D::MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32,
         for (size_t j = 1; j < left.getCols(); ++j)
             tmp = functor(tmp, left(i, j));
         if (incremental)
-            (*this).setCell(i, 0, (*this)(i, 0) + tmp * (grad == nullptr ? 1.f : (*grad)(i, 0)));
+            (*this).setCell(i, 0, (*this)(i, 0) + tmp * (multiplier == nullptr ? 1.f : (*multiplier)(i, 0)));
         else
-            (*this).setCell(i, 0, tmp * (grad == nullptr ? 1.f : (*grad)(i, 0)));
+            (*this).setCell(i, 0, tmp * (multiplier == nullptr ? 1.f : (*multiplier)(i, 0)));
     }
 }
 
-void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad, f32(*initFunctor)(const f32)) {
+void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier, f32(*initFunctor)(const f32)) {
     f32 tmp;
     if (initFunctor == nullptr)
         tmp = left(0, 0);
@@ -137,9 +137,9 @@ void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32
             tmp = functor(tmp, left(i, j));
 
     if (incremental)
-        (*this).setCell(0, 0, (*this)(0, 0) + tmp * (grad == nullptr ? 1.f : (*grad)(0, 0)));
+        (*this).setCell(0, 0, (*this)(0, 0) + tmp * (multiplier == nullptr ? 1.f : (*multiplier)(0, 0)));
     else
-        (*this).setCell(0, 0, tmp * (grad == nullptr ? 1.f : (*grad)(0, 0)));
+        (*this).setCell(0, 0, tmp * (multiplier == nullptr ? 1.f : (*multiplier)(0, 0)));
 }
 
 void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
@@ -219,7 +219,7 @@ void Matrix2D::AssignData(f32 *src) {
 }
 
 
-void Matrix2D::FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     f32 found_value;
     size_t found_index;
     for (size_t j = 0; j < getCols(); ++j) {
@@ -231,11 +231,11 @@ void Matrix2D::FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*fu
                 found_index = i;
             }
         for (size_t i = 0; i < getRows(); ++i)
-            setCell(i, j, (grad == nullptr ? 1.f : (*grad)(i, j)) * (i == found_index ? 1.f : 0.f));
+            setCell(i, j, (multiplier == nullptr ? 1.f : (*multiplier)(i, j)) * (i == found_index ? 1.f : 0.f));
     }
 }
 
-void Matrix2D::FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad) {
+void Matrix2D::FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *multiplier) {
     f32 found_value;
     size_t found_index;
     for (size_t i = 0; i < getRows(); ++i) {
@@ -247,7 +247,7 @@ void Matrix2D::FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*fu
                 found_index = j;
             }
         for (size_t j = 0; j < getCols(); ++j)
-            setCell(i, j, (grad == nullptr ? 1.f : (*grad)(i, j)) * (j == found_index ? 1.f : 0.f));
+            setCell(i, j, (multiplier == nullptr ? 1.f : (*multiplier)(i, j)) * (j == found_index ? 1.f : 0.f));
     }
 
 }

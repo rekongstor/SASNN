@@ -1,6 +1,6 @@
 #include "../../../include/Layer/Simple/LayerWeights.h"
-#include "LayerWeightsDecorators/DecoratorInitializer.h"
-#include "LayerWeightsDecorators/DecoratorGradientDescent.h"
+#include "../../../include/Layer/Simple/LayerWeightsDecorators/DecoratorInitializer.h"
+#include "../../../include/Layer/Simple/LayerWeightsDecorators/DecoratorGradientDescent.h"
 
 void LayerWeights::followProp() {
 

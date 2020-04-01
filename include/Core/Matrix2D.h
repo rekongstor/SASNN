@@ -27,46 +27,46 @@ public:
      * Performs unary functor on the corresponding cell
      * @param left : [rows x cols]
      */
-    void EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const Matrix2D *grad = nullptr);
+    void EachCellOperator(const Matrix2D &left, f32 (*functor)(f32), const Matrix2D *multiplier = nullptr);
     /**
      * Performs binary functor on the corresponding cell
      * @param left : [rows x cols]
      * @param right : [rows x cols]
      */
-    void EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr);
     /**
      * Performs binary functor on the each row
      * @param left [rows x cols]
      * @param right [1 x cols]
      */
-    void RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr);
     /**
      * Performs binary functor on the each column
      * @param left [rows x cols]
      * @param right [rows x 1]
      */
-    void ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void ColOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr);
     /**
      * Performs binary functor on the each cell
      * @param left [rows x cols]
      * @param right [1 x 1]
      */
-    void CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void CellOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr);
     /**
      * Merges all rows into one according to the binary functor
      * @param left [ANY x cols]
      */
-    void MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr, f32(*initFunctor)(const f32) = nullptr);
+    void MergeRowsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr, f32(*initFunctor)(const f32) = nullptr);
     /**
      * Merges all columns into one according to the binary functor
      * @param left [rows x ANY]
      */
-    void MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr, f32(*initFunctor)(const f32) = nullptr);
+    void MergeColsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr, f32(*initFunctor)(const f32) = nullptr);
     /**
      * Merges cells into one according to the binary functor (increasing columns for each row)
      * @param left [ANY x ANY]
      */
-    void MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *grad = nullptr, f32(*initFunctor)(const f32) = nullptr);
+    void MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr, f32(*initFunctor)(const f32) = nullptr);
     /**
      * Performs matrix multiplication
      * @param left [rows x ANY]
@@ -79,12 +79,12 @@ public:
      * @param left [rows x cols]
      * @param right [1 x cols]
      */
-    void FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr);
     /**
      * Compares values in the each column
      * @param left [rows x cols]
      * @param right [rows x 1]
      */
-    void FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *grad = nullptr);
+    void FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*functor)(const f32, const f32), const Matrix2D *multiplier = nullptr);
 };
 

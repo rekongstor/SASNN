@@ -12,6 +12,7 @@
 #include "../../include/Layer/Functional/LayerSum.h"
 #include "../../include/Layer/Simple/LayerWeightsDecorators/Initializer/InitializerXavier.h"
 #include "../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentStochastic.h"
+#include "../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentMomentum.h"
 
 
 #define ADD_LAYER(Type, ...) Layers.emplace_back( Type )
@@ -63,7 +64,7 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
 //            std::dynamic_pointer_cast<DecoratorGradientDescent>(std::make_shared<GradientDescentStochastic>())
 //    )));
 
-    auto Weights = ADD_LAYER(new LayerWeights(dataset.GetInputs(), dataset.GetOutputs(), new InitializerXavier(static_cast<f32>(dataset.GetInputs())), new GradientDescentStochastic));
+    auto Weights = ADD_LAYER(new LayerWeights(dataset.GetInputs(), dataset.GetOutputs(), new InitializerXavier(static_cast<f32>(dataset.GetInputs())), new GradientDescentMomentum(0.1f)));
 
     WeightsLayers.emplace_back(Weights);
     auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*Input, *Weights)); // [batch_size x outputs]

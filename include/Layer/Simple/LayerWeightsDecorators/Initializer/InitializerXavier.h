@@ -1,13 +1,13 @@
 #pragma once
 
 
-#include "../../../../../src/Layer/Simple/LayerWeightsDecorators/DecoratorInitializer.h"
+#include "../DecoratorInitializer.h"
 
 class InitializerXavier : public DecoratorInitializer {
     f32 inputs;
     void Initialize(Matrix2D &weights) override;
 public:
-    InitializerXavier(f32 inputs);
+    explicit InitializerXavier(f32 inputs);
 };
 
 

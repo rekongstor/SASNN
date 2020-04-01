@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../../../../../src/Layer/Simple/LayerWeightsDecorators/DecoratorInitializer.h"
+#include "../DecoratorInitializer.h"
 
 class InitializerUniform : public DecoratorInitializer {
     f32 a, b;

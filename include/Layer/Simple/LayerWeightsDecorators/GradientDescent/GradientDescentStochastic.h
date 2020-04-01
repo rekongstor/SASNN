@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../../../../../src/Layer/Simple/LayerWeightsDecorators/DecoratorGradientDescent.h"
+#include "../DecoratorGradientDescent.h"
 
 class GradientDescentStochastic : public DecoratorGradientDescent {
 public:
