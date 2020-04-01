@@ -113,3 +113,11 @@ void ClassificationNN::BackPropagation() {
     for (auto &Layer : Layers)
         Layer->clearGrad();
 }
+
+void ClassificationNN::Serialize(const char *filename) {
+    std::ofstream out(filename);
+    for (auto &W : WeightsLayers)
+        for (size_t j = 0; j < W->getData().getCols(); ++j)
+            for (size_t i = 0; i < W->getData().getRows(); ++i)
+                out << W->getData()(i, j) << std::endl;
+}

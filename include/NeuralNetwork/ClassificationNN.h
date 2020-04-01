@@ -27,6 +27,8 @@ public:
     template<class... Args>
     explicit ClassificationNN(Dataset &dataset, Args &&... args): ClassificationNN({std::forward<Args>(args)...}, dataset) {
     }
+
+    void Serialize(const char *filename) override;
 };
 
 

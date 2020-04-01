@@ -52,9 +52,10 @@ int main(int argc, const char *argv[]) {
 
     NeuralNetwork &NN = classificationNn;
     NN.ModifyParam('g', 0.1f);
-    NN.ModifyParam('l', 75.f);
-    for (int i = 0; i < 100; ++i)
-        std::cout << NN.Train(1) << std::endl;
+    NN.ModifyParam('l', 50.f);
+    for (int i = 0; i < 50; ++i)
+        std::cout << NN.Train(10) << std::endl;
+    NN.Serialize("nn.txt");
     system("pause");
     return 0;
 }
