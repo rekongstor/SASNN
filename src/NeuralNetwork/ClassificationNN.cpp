@@ -10,10 +10,12 @@
 #include "../../include/Layer/Accuracy/LayerClassificationAccuracy.h"
 #include "../../include/Layer/NLF/LayerLeakyReLU.h"
 #include "../../include/Layer/Functional/LayerSum.h"
+#include "../../include/Layer/Simple/LayerWeightsDecorators/Initializer/InitializerXavier.h"
+#include "../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentStochastic.h"
 
 
-#define LAYER(Type, ...) Layers.emplace_back(std::dynamic_pointer_cast<Layer>(std::make_shared< Type >( __VA_ARGS__ )))
-#define PARAM(Param, Value) HyperParams.emplace( Param , std::make_shared<Matrix2D>( Value ))
+#define ADD_LAYER(Type, ...) Layers.emplace_back( Type )
+#define ADD_PARAM(Param, Value) HyperParams.emplace( Param , std::make_shared<Matrix2D>( Value ))
 
 
 f32 ClassificationNN::Test() {
@@ -31,36 +33,46 @@ f32 ClassificationNN::Train(u64 steps) {
 
         ForwardPropagation();
         BackPropagation();
-
+        GradientDescent();
+        ClearGradients();
     }
     return acc;
 }
 
 ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
-    PARAM('l', 1.f);
-    PARAM('g', 1.f);
+    ADD_PARAM('l', 1.f);
+    ADD_PARAM('g', 1.f);
 
     // Setting dataset layers
     auto[train_inputs, train_outputs] = DataSet.GetTrainSample(false);
-    auto Input = LAYER(LayerData, train_inputs); // [batch_size x inputs]
-    auto Output = LAYER(LayerData, train_outputs); // [batch_size x outputs]
+    auto Input = ADD_LAYER(new LayerData(train_inputs)); // [batch_size x inputs]
+    auto Output = ADD_LAYER(new LayerData(train_outputs)); // [batch_size x outputs]
     IO = {Input, Output};
 
     // Setting hyper-parameter layers
-    auto L2RegParam = LAYER(LayerData, *HyperParams['l']);
-
+    auto L2RegParam = ADD_LAYER(new LayerData(*HyperParams['l']));
     // Setting FullyConnected architecture
-    auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(), static_cast<f32>(dataset.GetInputs())); // [inputs x outputs]
-    //auto Weights = LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs()); // [inputs x outputs]
+//    auto Weights = ADD_LAYER(LayerWeights, dataset.GetInputs(), dataset.GetOutputs(),
+//                             SP_CAST(DecoratorInitializer, InitializerXavier, static_cast<f32>(dataset.GetInputs())),
+//                             SP_CAST(DecoratorGradientDescent, GradientDescentStochastic));
+//
+//    Layers.emplace_back(std::dynamic_pointer_cast<Layer>(std::make_shared<LayerWeights>(
+//            dataset.GetInputs(), dataset.GetOutputs(),
+//            std::dynamic_pointer_cast<DecoratorInitializer>(std::make_shared<InitializerXavier>(static_cast<f32>(dataset.GetInputs()))),
+//            std::dynamic_pointer_cast<DecoratorGradientDescent>(std::make_shared<GradientDescentStochastic>())
+//    )));
+
+    auto Weights = ADD_LAYER(new LayerWeights(dataset.GetInputs(), dataset.GetOutputs(), new InitializerXavier(static_cast<f32>(dataset.GetInputs())), new GradientDescentStochastic));
+
     WeightsLayers.emplace_back(Weights);
-    auto FullyConnected = LAYER(LayerFullyConnected, *Input, *Weights); // [batch_size x outputs]
+    auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*Input, *Weights)); // [batch_size x outputs]
 
     // Setting Loss function
-    auto SoftMax = LAYER(LayerStableSoftMax, *FullyConnected, true);
-    auto CrossEntropyLoss = LAYER(LayerCrossEntropyLoss, *SoftMax, *Output);
-    auto L2Regularization = LAYER(LayerL2Reg, *Weights, *L2RegParam);
-    auto Loss = LAYER(LayerSum, *CrossEntropyLoss, *L2Regularization);
+    auto SoftMax = ADD_LAYER(new LayerStableSoftMax(*FullyConnected, true));
+    auto CrossEntropyLoss = ADD_LAYER(new LayerCrossEntropyLoss(*SoftMax, *Output));
+    auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
+    auto Loss = ADD_LAYER(new LayerSum(*CrossEntropyLoss, *L2Regularization));
     LossFunction = Loss;
 
     // Setting Accuracy layer
@@ -104,14 +116,18 @@ void ClassificationNN::BackPropagation() {
     LossFunction->getGrad()->Fill(1.f);
     for (auto it = Layers.rbegin(); it != Layers.rend(); ++it)
         (*it)->backProp();
+}
 
-    // Perform gradient descent
-    for (auto &Weight : WeightsLayers)
-        Weight->subGrad((*HyperParams['g'])(0, 0));
-
+void ClassificationNN::ClearGradients() {
     // Clear gradients
     for (auto &Layer : Layers)
         Layer->clearGrad();
+}
+
+void ClassificationNN::GradientDescent() {
+    // Perform gradient descent
+    for (auto &Weight : WeightsLayers)
+        Weight->subGrad((*HyperParams['g'])(0, 0));
 }
 
 void ClassificationNN::Serialize(const char *filename) {

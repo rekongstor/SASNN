@@ -16,6 +16,8 @@ class ClassificationNN : public NeuralNetwork {
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> IO;
     void ForwardPropagation(Layer *stop_layer = nullptr);
     void BackPropagation();
+    void GradientDescent();
+    void ClearGradients();
     std::map<char, std::shared_ptr<Matrix2D>> HyperParams;
 
     explicit ClassificationNN(std::vector<u32> &&layers, Dataset &dataset);

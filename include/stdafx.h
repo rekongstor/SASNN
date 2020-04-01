@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cstdint"
+//#define SP_CAST(Base,Derived,...) std::dynamic_pointer_cast< Base >(std::make_shared< Derived >( __VA_ARGS__ ))
 
 typedef int8_t s8;
 typedef uint8_t u8;

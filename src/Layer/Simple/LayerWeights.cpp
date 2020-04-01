@@ -1,4 +1,6 @@
 #include "../../../include/Layer/Simple/LayerWeights.h"
+#include "LayerWeightsDecorators/DecoratorInitializer.h"
+#include "LayerWeightsDecorators/DecoratorGradientDescent.h"
 
 void LayerWeights::followProp() {
 
@@ -8,29 +10,16 @@ void LayerWeights::backProp() {
 
 }
 
-LayerWeights::LayerWeights(size_t rows, size_t cols, bool random) : LayerDynamic(rows, cols),
-                                                                    gradLength(1, 1) {
-    if (random) {
-        RandomUniform randomUniform(-.5f, .5f);
-        Random *rng = &randomUniform;
-        for (size_t i = 0; i < rows; ++i)
-            for (size_t j = 0; j < cols; ++j)
-                data.setCell(i, j, rng->Next());
-    } else
-        data.Clean();
+
+
+
+LayerWeights::LayerWeights(size_t rows, size_t cols, DecoratorInitializer *decoratorInitializer, DecoratorGradientDescent *decoratorGradientDescent) :
+        LayerDynamic(rows, cols),
+        gradLength(1, 1),
+        gradientDescent(decoratorGradientDescent) {
+    decoratorInitializer->Initialize(data);
 }
 
-LayerWeights::LayerWeights(size_t rows, size_t cols, f32 xavier_inputs) : LayerDynamic(rows, cols),
-                                                                          gradLength(1, 1) {
-    RandomGaussian randomGaussian = RandomGaussian(
-            0.f,
-            sqrtf(2.f / xavier_inputs));
-    Random *rng = &randomGaussian;
-
-    for (size_t i = 0; i < rows; ++i)
-        for (size_t j = 0; j < cols; ++j)
-            data.setCell(i, j, rng->Next());
-}
 
 void LayerWeights::subGrad(f32 step) {
     // Gradient normalization
@@ -39,14 +28,12 @@ void LayerWeights::subGrad(f32 step) {
     }, nullptr, [](const f32 l) -> f32 {
         return l * l;
     });
-
     gradLength.setCell(0, 0, sqrtf(gradLength(0, 0)) / step);
-//    gradLength.setCell(0, 0, 1 / step);
-
     grad.CellOperator(grad, gradLength, [](const f32 l, const f32 r) -> f32 {
         return -l + l / r;
     });
 
+    // Gradient Descent
     data.EachCellOperator(data, grad, [](const f32 l, const f32 r) -> f32 {
         return l - r;
     });
@@ -57,7 +44,7 @@ void LayerWeights::assignData(const Matrix2D *d) {
 }
 
 void LayerWeights::clearGrad() {
-    grad.EachCellOperator(grad,[](const f32 l)->f32{
+    grad.EachCellOperator(grad, [](const f32 l) -> f32 {
         return l * 0.9f;
     });
     grad.Clean();
