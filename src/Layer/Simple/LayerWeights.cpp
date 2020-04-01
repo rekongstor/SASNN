@@ -10,16 +10,13 @@ void LayerWeights::backProp() {
 
 }
 
-
-
-
 LayerWeights::LayerWeights(size_t rows, size_t cols, DecoratorInitializer *decoratorInitializer, DecoratorGradientDescent *decoratorGradientDescent) :
         LayerDynamic(rows, cols),
         gradLength(1, 1),
-        gradientDescent(decoratorGradientDescent) {
-    decoratorInitializer->Initialize(data);
+        gradientDescent(decoratorGradientDescent),
+        initializer(decoratorInitializer) {
+    initializer->Initialize(data);
 }
-
 
 void LayerWeights::subGrad(f32 step) {
     // Gradient normalization
