@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <map>
+#include <list>
 #include "NeuralNetwork.h"
 #include "../Dataset/Dataset.h"
 #include "../Layer/Abstract/Layer.h"
@@ -13,7 +14,10 @@ class ClassificationNN : public NeuralNetwork {
     std::vector<std::shared_ptr<Layer>> WeightsLayers;
     std::shared_ptr<Layer> LossFunction;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> AccuracyLayer;
+    std::shared_ptr<Layer> L2RegularizationLayer;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> IO;
+    std::list<f32> annealValues;
+    f32 annealDeviation = std::numeric_limits<f32>::max();
     void ForwardPropagation(Layer *stop_layer = nullptr);
     void BackPropagation();
     void GradientDescent();

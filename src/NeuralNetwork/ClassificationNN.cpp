@@ -24,11 +24,11 @@
 
 
 std::pair<f32, f32> ClassificationNN::Test() {
-    return {GetAccuracy(DataSet.GetValidationSamples()),GetAccuracy(DataSet.GetTestSamples())};
+    return {GetAccuracy(DataSet.GetValidationSamples()), GetAccuracy(DataSet.GetTestSamples())};
 }
 
 std::pair<f32, f32> ClassificationNN::Train() {
-    for (u64 i = 0; i < roundf(GET_PARAM('s')); ++i) {
+    for (u64 i = 0; i < std::round(GET_PARAM('s')); ++i) {
         // Load next batch
         auto[Inputs, Outputs] = IO;
         auto[train_inputs, train_outputs] = DataSet.GetTrainSample(true);
@@ -40,15 +40,38 @@ std::pair<f32, f32> ClassificationNN::Train() {
         GradientDescent();
         ClearGradients();
     }
+    f32 valAcc = GetAccuracy(DataSet.GetTrainSample(false));
+    f32 testAcc = GetAccuracy(DataSet.GetValidationSample(true));
+    annealValues.push_back(valAcc);
 
-    return {GetAccuracy(DataSet.GetTrainSample(false)), GetAccuracy(DataSet.GetValidationSample(true))};
+    f32 ann_dev = 0.f;
+    if (annealValues.size() >= std::round(GET_PARAM('q'))) {
+        annealValues.pop_front();
+        f32 ann_mean = 0.f;
+        for (auto &&ad : annealValues)
+            ann_mean += ad;
+        for (auto &&ad : annealValues)
+            ann_dev += (ann_mean - ad) * (ann_mean - ad);
+        ann_dev = 1 / sqrt(ann_dev) * (GET_PARAM('q') - 1.f);
+
+        if (annealDeviation > ann_dev) {
+            annealDeviation = ann_dev;
+            ModifyParam('l', GET_PARAM('l') * GET_PARAM('d'));
+            printf("Learning rate was decreased! Current value: %f\n", GET_PARAM('l'));
+            annealValues.clear();
+        }
+    }
+
+    return {valAcc, testAcc};
 }
 
 ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
-    ADD_PARAM('l', 0.0001f);
-    ADD_PARAM('g', 75.f);
-    ADD_PARAM('s', 10.f);
+    ADD_PARAM('l', 0.0001f); // Learning rate
+    ADD_PARAM('r', 40.f); // Regularization
+    ADD_PARAM('s', 1.f); // Steps
+    ADD_PARAM('d', 0.5f); // Annealing decrease
+    ADD_PARAM('q', 50.f); // Annealing queue size
 
     // Setting dataset layers
     auto[train_inputs, train_outputs] = DataSet.GetTrainSample(false);
@@ -57,7 +80,8 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
     IO = {Input, Output};
 
     // Setting hyper-parameter layers
-    auto L2RegParam = ADD_LAYER(new LayerData(*HyperParams['l']));
+    auto L2RegParam = ADD_LAYER(new LayerData(*HyperParams['r']));
+    L2RegularizationLayer = L2RegParam;
     // Setting FullyConnected architecture
     auto Weights = ADD_LAYER(new LayerWeights(dataset.GetInputs(), dataset.GetOutputs(), new InitializerXavier(static_cast<f32>(dataset.GetInputs())), new GradientDescentAdam));
 
@@ -76,11 +100,31 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
 }
 
 void ClassificationNN::ModifyParam(char param_name, f32 value) {
+    switch (param_name) {
+        case 's':
+            if (std::round(value) < 1) {
+                std::cout << "Parameter 's' cannot be less than 1!";
+                return;
+            }
+            break;
+        case 'q':
+            if (std::round(value) < 2) {
+                std::cout << "Parameter 'q' cannot be less than 2!";
+                return;
+            }
+            break;
+        default:
+            break;
+    }
+
     auto m = HyperParams.find(param_name);
     if (m != HyperParams.end())
         (*m->second).setCell(0, 0, value);
-    else
+    else {
         std::cout << "Invalid parameter name: " << param_name << std::endl;
+        return;
+    }
+
 }
 
 f32 ClassificationNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples) {
@@ -136,7 +180,7 @@ void ClassificationNN::ClearGradients() {
 void ClassificationNN::GradientDescent() {
     // Perform gradient descent
     for (auto &Weight : WeightsLayers)
-        Weight->subGrad(GET_PARAM('g'));
+        Weight->subGrad(GET_PARAM('l'));
 }
 
 void ClassificationNN::Serialize(const char *filename) {
