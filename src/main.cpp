@@ -48,19 +48,19 @@ int main(int argc, const char *argv[]) {
 
 
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    ClassificationNN classificationNn(datasetStandard, 16u, 16u);
+    ClassificationNN classificationNn(datasetStandard);
 
     Dataset &dataset = datasetStandard;
     dataset.PreprocessMean();
     NeuralNetwork &NN = classificationNn;
-    NN.ModifyParam('l', 1.f);
-    NN.ModifyParam('r', 40.f);
-    for (int i = 0; i < 2000; ++i) {
+    NN.ModifyParam('l', 0.01f);
+    NN.ModifyParam('r', 10.0f);
+    for (int i = 0; i < 50; ++i) {
         auto[train_acc, val_acc] = NN.Train();
-        printf("Accuracy Train/Validation: [%.2f]/[%.2f] Diff: %.2f\n", train_acc, val_acc, train_acc-val_acc);
+        printf("Accuracy Train/Validation: [%.2f]/[%.2f] Diff: %.2f\n", train_acc, val_acc, train_acc - val_acc);
     }
     auto[val_acc, test_acc] = NN.Test();
-    printf("Accuracy Validation/Test: [%.4f]/[%.4f] Diff: %.4f\n", val_acc, test_acc, val_acc-test_acc);
+    printf("Accuracy Validation/Test: [%.4f]/[%.4f] Diff: %.4f\n", val_acc, test_acc, val_acc - test_acc);
     NN.Serialize("nn.txt");
     system("pause");
     return 0;

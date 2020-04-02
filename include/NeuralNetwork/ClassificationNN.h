@@ -16,8 +16,7 @@ class ClassificationNN : public NeuralNetwork {
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> AccuracyLayer;
     std::shared_ptr<Layer> L2RegularizationLayer;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> IO;
-    std::list<f32> annealValues;
-    f32 annealDeviation = std::numeric_limits<f32>::max();
+    std::vector<f32> annealLossValues;
     void ForwardPropagation(Layer *stop_layer = nullptr);
     void BackPropagation();
     void GradientDescent();
@@ -36,6 +35,7 @@ public:
     }
 
     void Serialize(const char *filename) override;
+    void AdaptLearningRate();
 };
 
 

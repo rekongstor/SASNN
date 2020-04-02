@@ -10,6 +10,7 @@
 #include "../../include/Layer/Accuracy/LayerClassificationAccuracy.h"
 #include "../../include/Layer/NLF/LayerLeakyReLU.h"
 #include "../../include/Layer/Functional/LayerSum.h"
+#include "../../include/Layer/Functional/LayerBatchNormalization.h"
 #include "../../include/Layer/Simple/LayerWeightsDecorators/Initializer/InitializerXavier.h"
 #include "../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentStochastic.h"
 #include "../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentMomentum.h"
@@ -34,44 +35,53 @@ std::pair<f32, f32> ClassificationNN::Train() {
         auto[train_inputs, train_outputs] = DataSet.GetTrainSample(true);
         Inputs->assignData(&train_inputs);
         Outputs->assignData(&train_outputs);
-
         ForwardPropagation();
         BackPropagation();
         GradientDescent();
         ClearGradients();
+
+        annealLossValues[i] = LossFunction->getData()(0, 0);
     }
-    f32 valAcc = GetAccuracy(DataSet.GetTrainSample(false));
-    f32 testAcc = GetAccuracy(DataSet.GetValidationSample(true));
-    annealValues.push_back(valAcc);
+    AdaptLearningRate();
 
-    f32 ann_dev = 0.f;
-    if (annealValues.size() >= std::round(GET_PARAM('q'))) {
-        annealValues.pop_front();
-        f32 ann_mean = 0.f;
-        for (auto &&ad : annealValues)
-            ann_mean += ad;
-        for (auto &&ad : annealValues)
-            ann_dev += (ann_mean - ad) * (ann_mean - ad);
-        ann_dev = 1 / sqrt(ann_dev) * (GET_PARAM('q') - 1.f);
+    f32 trainAcc = GetAccuracy(DataSet.GetTrainSample(false));
+    f32 valAcc = GetAccuracy(DataSet.GetValidationSample(true));
 
-        if (annealDeviation > ann_dev) {
-            annealDeviation = ann_dev;
-            ModifyParam('l', GET_PARAM('l') * GET_PARAM('d'));
-            printf("Learning rate was decreased! Current value: %f\n", GET_PARAM('l'));
-            annealValues.clear();
-        }
+
+    return {trainAcc, valAcc};
+}
+
+void ClassificationNN::AdaptLearningRate() {
+    f32 annMean = 0.f;
+    for (auto &&lv : annealLossValues)
+        annMean += lv;
+    annMean /= GET_PARAM('s');
+    f32 x_avr = GET_PARAM('s') / 2.f;
+    f32 y_avr = annMean;
+    f32 top = 0.f, btm = 0.f;
+    f32 a;
+    for (int i = 0; i < annealLossValues.size(); ++i) {
+        top += (static_cast<f32>(i) - x_avr) * (annealLossValues[i] - y_avr);
+        btm += (static_cast<f32>(i) - x_avr) * (static_cast<f32>(i) - x_avr);
     }
-
-    return {valAcc, testAcc};
+    a = top / btm;
+    //printf("Front: %f; Back: %f Mean: %f; a:%f\n", annealLossValues.front(), annealLossValues.back(), annMean, a);
+    if (annealLossValues.front() < annMean || a > -0.05f) {
+        ModifyParam('l', GET_PARAM('l') * GET_PARAM('a'));
+        printf("Loss is growing! Learning rate was decreased! Current value: %f\n", GET_PARAM('l'));
+    } else if (a < -0.1f) {
+        ModifyParam('l', GET_PARAM('l') / GET_PARAM('a'));
+        printf("Loss is decreasing! Learning rate was increased! Current value: %f\n", GET_PARAM('l'));
+    }
 }
 
 ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
     ADD_PARAM('l', 0.0001f); // Learning rate
     ADD_PARAM('r', 40.f); // Regularization
-    ADD_PARAM('s', 1.f); // Steps
-    ADD_PARAM('d', 0.5f); // Annealing decrease
-    ADD_PARAM('q', 50.f); // Annealing queue size
+    ADD_PARAM('s', 5.f); // Steps
+    ADD_PARAM('a', 0.9f); // Annealing multiplier
+    annealLossValues.resize(std::round(GET_PARAM('s')));
 
     // Setting dataset layers
     auto[train_inputs, train_outputs] = DataSet.GetTrainSample(false);
@@ -87,6 +97,7 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
 
     WeightsLayers.emplace_back(Weights);
     auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*Input, *Weights)); // [batch_size x outputs]
+    //auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*FullyConnected));
 
     // Setting Loss function
     auto SoftMax = ADD_LAYER(new LayerStableSoftMax(*FullyConnected, true));
@@ -102,14 +113,15 @@ ClassificationNN::ClassificationNN(std::vector<u32> &&layers, Dataset &dataset) 
 void ClassificationNN::ModifyParam(char param_name, f32 value) {
     switch (param_name) {
         case 's':
-            if (std::round(value) < 1) {
-                std::cout << "Parameter 's' cannot be less than 1!";
+            if (std::round(value) < 10) {
+                std::cout << "Parameter 's' cannot be less than 10!";
                 return;
-            }
+            } else
+                annealLossValues.resize(std::round(value));
             break;
-        case 'q':
-            if (std::round(value) < 2) {
-                std::cout << "Parameter 'q' cannot be less than 2!";
+        case 'a':
+            if (value > 1.f) {
+                std::cout << "Parameter 'a' cannot be more than 1!";
                 return;
             }
             break;
