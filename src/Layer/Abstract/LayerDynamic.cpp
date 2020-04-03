@@ -18,6 +18,6 @@ void LayerDynamic::transposeData() {
     data.Transpose();
 }
 
-void LayerDynamic::assignData(const Matrix2D *) {
+void LayerDynamic::assignData(Matrix2D *) {
     throw std::runtime_error("Unable to assign data to not a simple layer");
 }

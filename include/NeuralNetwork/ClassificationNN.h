@@ -12,6 +12,7 @@ class ClassificationNN : public NeuralNetwork {
 
     std::vector<std::shared_ptr<Layer>> Layers;
     std::vector<std::shared_ptr<Layer>> WeightsLayers;
+    std::vector<std::shared_ptr<Layer>> RegularizationLayers;
     std::shared_ptr<Layer> LossFunction;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> AccuracyLayer;
     std::shared_ptr<Layer> L2RegularizationLayer;
@@ -23,9 +24,9 @@ class ClassificationNN : public NeuralNetwork {
     void ClearGradients();
     std::map<char, std::shared_ptr<Matrix2D>> HyperParams;
 
-    explicit ClassificationNN(std::vector<u32> &&layers, Dataset &dataset);
-    f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);
-    f32 GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample);
+    explicit ClassificationNN(std::vector<s32> &&layers, Dataset &dataset);
+    f32 GetAccuracy(std::pair< std::vector<Matrix2D> &,  std::vector<Matrix2D> &> samples);
+    f32 GetAccuracy(std::pair< Matrix2D &,  Matrix2D &> sample);
     void ModifyParam(char param_name, f32 value) override;
     std::pair<f32, f32> Test() override;
     std::pair<f32, f32> Train() override;

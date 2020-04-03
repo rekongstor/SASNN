@@ -10,8 +10,8 @@ class LayerData : public Layer {
 protected:
     void transposeData() override;
 public:
-    explicit LayerData(const Matrix2D& data);
-    void assignData(const Matrix2D *d) override;
+    explicit LayerData(Matrix2D &data);
+    void assignData(Matrix2D *d) override;
 };
 
 

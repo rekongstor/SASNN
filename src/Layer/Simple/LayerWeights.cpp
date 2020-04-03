@@ -22,7 +22,7 @@ void LayerWeights::subGrad(f32 step) {
     gradientDescent->subGrad(data, grad, step);
 }
 
-void LayerWeights::assignData(const Matrix2D *d) {
+void LayerWeights::assignData(Matrix2D *d) {
     data = *d;
 }
 

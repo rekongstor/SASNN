@@ -19,10 +19,10 @@ class DatasetStandard : public Dataset {
     std::vector<Matrix2D> test_outputs; // [batchSize x outputs]
     template<class T>
     T ConvertEndian(T value);
-    std::pair<const Matrix2D &, const Matrix2D &> GetTrainSample(bool moveCursor) override;
-    std::pair<const Matrix2D &, const Matrix2D &> GetValidationSample(bool moveCursor) override;
-    std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> GetValidationSamples() override;
-    std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> GetTestSamples() override;
+    std::pair< Matrix2D &,  Matrix2D &> GetTrainSample(bool moveCursor) override;
+    std::pair< Matrix2D &,  Matrix2D &> GetValidationSample(bool moveCursor) override;
+    std::pair< std::vector<Matrix2D> &,  std::vector<Matrix2D> &> GetValidationSamples() override;
+    std::pair< std::vector<Matrix2D> &,  std::vector<Matrix2D> &> GetTestSamples() override;
     [[nodiscard]] u32 GetInputs() const override;
     [[nodiscard]] u32 GetOutputs() const override;
     [[nodiscard]] u32 GetBatchSize() const override;

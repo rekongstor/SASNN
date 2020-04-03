@@ -107,7 +107,7 @@ void DatasetStandard::PreprocessMean()
     }
 }
 
-std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample(bool moveCursor) {
+std::pair< Matrix2D &,  Matrix2D &> DatasetStandard::GetTrainSample(bool moveCursor) {
     if (moveCursor)
         ++currentTrainSample;
     if (currentTrainSample >= train_inputs.size())
@@ -115,7 +115,7 @@ std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetTrainSample(bo
     return {train_inputs[currentTrainSample], train_outputs[currentTrainSample]};
 }
 
-std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetValidationSample(bool moveCursor) {
+std::pair< Matrix2D &,  Matrix2D &> DatasetStandard::GetValidationSample(bool moveCursor) {
     if (moveCursor)
         ++currentValSample;
     if (currentValSample >= validation_inputs.size())
@@ -123,11 +123,11 @@ std::pair<const Matrix2D &, const Matrix2D &> DatasetStandard::GetValidationSamp
     return {validation_inputs[currentValSample], validation_outputs[currentValSample]};
 }
 
-std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetStandard::GetTestSamples() {
+std::pair< std::vector<Matrix2D> &,  std::vector<Matrix2D> &> DatasetStandard::GetTestSamples() {
     return {test_inputs, test_outputs};
 }
 
-std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetStandard::GetValidationSamples() {
+std::pair< std::vector<Matrix2D> &,  std::vector<Matrix2D> &> DatasetStandard::GetValidationSamples() {
     return {validation_inputs, validation_outputs};
 }
 

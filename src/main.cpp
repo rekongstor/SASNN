@@ -5,6 +5,8 @@
 #include "../include/Dataset/DatasetStandard.h"
 #include "../include/NeuralNetwork/ClassificationNN.h"
 
+extern void test();
+
 const char *fileName = "";
 size_t batchSize = 512;
 f32 testCoef = 0.1f;
@@ -46,15 +48,16 @@ int main(int argc, const char *argv[]) {
             return 4;
         }
 
-
+    test();
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    ClassificationNN classificationNn(datasetStandard);
+    ClassificationNN classificationNn(datasetStandard, 100);
 
     Dataset &dataset = datasetStandard;
     dataset.PreprocessMean();
     NeuralNetwork &NN = classificationNn;
-    NN.ModifyParam('l', 0.01f);
-    NN.ModifyParam('r', 10.0f);
+    NN.ModifyParam('l', 0.001f);
+    NN.ModifyParam('r', 1.f);
+    NN.ModifyParam('s', 20.f);
     for (int i = 0; i < 50; ++i) {
         auto[train_acc, val_acc] = NN.Train();
         printf("Accuracy Train/Validation: [%.2f]/[%.2f] Diff: %.2f\n", train_acc, val_acc, train_acc - val_acc);

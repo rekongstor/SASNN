@@ -1,7 +1,7 @@
 #include "../../../include/Layer/Simple/LayerData.h"
 #include <stdexcept>
 
-LayerData::LayerData(const Matrix2D &data) : Layer(data) {
+LayerData::LayerData(Matrix2D &data) : Layer(data) {
 
 }
 
@@ -24,6 +24,6 @@ void LayerData::transposeData() {
 #endif
 }
 
-void LayerData::assignData(const Matrix2D *d) {
+void LayerData::assignData(Matrix2D *d) {
     self = d;
 }
