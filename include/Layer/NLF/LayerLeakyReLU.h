@@ -9,7 +9,7 @@ class LayerLeakyReLU : public LayerDynamic {
     void followProp() override;
     void backProp() override;
 public:
-    explicit LayerLeakyReLU(Layer& left, f32 leak = 0.01f);
+    explicit LayerLeakyReLU(Layer &left, f32 leak = 0.01f);
 };
 
 
