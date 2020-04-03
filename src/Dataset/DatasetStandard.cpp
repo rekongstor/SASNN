@@ -59,26 +59,26 @@ DatasetStandard::DatasetStandard(const char* filename, size_t batchSize, f32 tes
         file.read(reinterpret_cast<char *>(data.data()), dataSize * inputs * sizeof(f32));
 
         for (size_t i = train_start; i < train_end; ++i)
-            train_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
+            train_inputs.emplace_back(batchSize, inputs, false).AssignData(data.data() + i * batchSize * inputs);
 
         for (size_t i = validation_start; i < validation_end; ++i)
-            validation_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
+            validation_inputs.emplace_back(batchSize, inputs, false).AssignData(data.data() + i * batchSize * inputs);
 
         for (size_t i = test_start; i < test_end; ++i)
-            test_inputs.emplace_back(std::move(Matrix2D(batchSize, inputs, false))).AssignData(data.data() + i * batchSize * inputs);
+            test_inputs.emplace_back(batchSize, inputs, false).AssignData(data.data() + i * batchSize * inputs);
     }
     {
         std::vector<f32> data(dataSize * static_cast<u64>(outputs));
         file.read(reinterpret_cast<char *>(data.data()), dataSize * static_cast<u64>(outputs) * sizeof(f32));
 
         for (size_t i = train_start; i < train_end; ++i)
-            train_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
+            train_outputs.emplace_back(batchSize, outputs, false).AssignData(data.data() + i * batchSize * outputs);
 
         for (size_t i = validation_start; i < validation_end; ++i)
-            validation_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
+            validation_outputs.emplace_back(batchSize, outputs, false).AssignData(data.data() + i * batchSize * outputs);
 
         for (size_t i = test_start; i < test_end; ++i)
-            test_outputs.emplace_back(std::move(Matrix2D(batchSize, outputs, false))).AssignData(data.data() + i * batchSize * outputs);
+            test_outputs.emplace_back(batchSize, outputs, false).AssignData(data.data() + i * batchSize * outputs);
     }
     std::cout <<
               "Dataset loaded!" << std::endl <<

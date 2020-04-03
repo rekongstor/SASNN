@@ -4,12 +4,12 @@
 #include "../Abstract/LayerDynamic.h"
 
 class LayerLeakyReLU : public LayerDynamic {
+    Matrix2D leak;
     Layer& left;
-    Layer& right;
     void followProp() override;
     void backProp() override;
 public:
-    LayerLeakyReLU(Layer &left, Layer &right);
+    LayerLeakyReLU(Layer &left, f32 leak);
 };
 
 
