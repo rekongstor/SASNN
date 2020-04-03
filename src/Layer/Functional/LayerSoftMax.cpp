@@ -1,15 +1,15 @@
 #include <cmath>
-#include "LayerSoftMax.h"
+#include "../../../include/Layer/Functional/LayerSoftMax.h"
 
 void LayerSoftMax::followProp() {
     auto Merge_functor = RowOriented ? &Matrix2D::MergeColsOperator : &Matrix2D::MergeRowsOperator;
     auto Data_functor = RowOriented ? &Matrix2D::ColOperator : &Matrix2D::RowOperator;
-    (Es.*Merge_functor)(data, [](const f32 l, const f32 r) -> f32 {
+    (Es.*Merge_functor)(left.getData(), [](const f32 l, const f32 r) -> f32 {
         return l + expf(r);
     }, nullptr, [](const f32 l) -> f32 {
         return expf(l);
     });
-    (data.*Data_functor)(data, Es, [](const f32 l, const f32 r) -> f32 {
+    (data.*Data_functor)(left.getData(), Es, [](const f32 l, const f32 r) -> f32 {
         return expf(l) / r;
     }, nullptr);
 }

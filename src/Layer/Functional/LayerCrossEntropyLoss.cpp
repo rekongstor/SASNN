@@ -13,8 +13,8 @@ void LayerCrossEntropyLoss::followProp() {
 void LayerCrossEntropyLoss::backProp() {
     if (left.getGrad() != nullptr) {
         Matrix2D &g = *left.getGrad();
-        g.EachCellOperator(left.getData(), right.getData(), [](const f32 l, const f32 r) -> f32 {
-            return -1.f / l * r;
+        g.EachCellOperator(left.getData(), right.getData(), [](const f32 p, const f32 c) -> f32 {
+            return -c / p + (1.f - c) / (1.f - p);
         },&grad);
     }
 }
