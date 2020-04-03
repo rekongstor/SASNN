@@ -116,9 +116,9 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
         auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons));
         // ReLU
         auto ReLU = ADD_LAYER(new LayerSigmoid(*BatchNormalization));
-        auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
+        auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam, false));
         RegularizationLayers.push_back(L2Regularization);
-        auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
+        auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam, false));
         RegularizationLayers.push_back(L2RegularizationBias);
         InputNeurons = ReLU;
     }
@@ -138,9 +138,9 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
     WeightsLayers.emplace_back(Biases);
     auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
 
-    auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
+    auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam, false));
     RegularizationLayers.push_back(L2Regularization);
-    auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
+    auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam, false));
     RegularizationLayers.push_back(L2RegularizationBias);
 
     // Setting Loss function

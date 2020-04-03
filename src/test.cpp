@@ -19,6 +19,8 @@
 #include "../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentAdaGrad.h"
 #include "../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentAdam.h"
 #include "../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentRMSProp.h"
+#include "../include/Layer/Functional/LayerExp.h"
+#include "../include/Layer/Functional/LayerLog.h"
 
 void test() {
     Layer *inp = new LayerWeights(2, 3, new InitializerUniform(0, 1), new GradientDescentStochastic);
@@ -26,42 +28,58 @@ void test() {
     for (int i = 0; i < 2; ++i)
         for (int j = 0; j < 4; ++j)
             out->getData().Fill(0.f);
-        out->getData().setCell(0,0,1.f);
-        out->getData().setCell(1,1,1.f);
-    Layer *weight = new LayerWeights(3, 4, new InitializerUniform(0,10), new GradientDescentStochastic);
+    out->getData().setCell(0, 0, 1.f);
+    out->getData().setCell(1, 1, 1.f);
+    Layer *weight = new LayerWeights(3, 4, new InitializerUniform(-1, 1), new GradientDescentStochastic);
+    Matrix2D l2r(1.f);
+    Layer *l2rd = new LayerData(l2r);
+    Layer *l2reg = new LayerL2Reg(*weight, *l2rd, false);
+    Layer *bias = new LayerWeights(1, 4, new InitializerUniform(-1, 1), new GradientDescentStochastic);
     Layer *fc = new LayerFullyConnected(*inp, *weight);
-    Layer *sm = new LayerSoftMax(*fc, true);
+    Layer *neurons = new LayerSum(*fc, *bias);
+    Layer *norma = new LayerBatchNormalization(*neurons);
+    Layer *sm = new LayerStableSoftMax(*norma, true);
     Layer *l = new LayerCrossEntropyLoss(*sm, *out);
-    f32 delta = 0.001;
+    Layer *loss = new LayerSum(*l, *l);
+    l2reg->followProp();
     fc->followProp();
+    neurons->followProp();
+    norma->followProp();
     sm->followProp();
     l->followProp();
-    l->getGrad()->Fill(1.f);
+    loss->followProp();
+    loss->getGrad()->Fill(1.f);
+    loss->backProp();
     l->backProp();
     sm->backProp();
+    norma->backProp();
+    neurons->backProp();
     fc->backProp();
-    // analytic gradient
+    l2reg->backProp();
+
     auto &target = weight;
     Matrix2D anal = *target->getGrad();
-    weight->clearGrad();
-    fc->clearGrad();
-    sm->clearGrad();
+    // numeric gradient
+    f32 delta = 0.001;
 
-    f32 f = l->getData()(0, 0);
+    f32 f = loss->getData()(0, 0);
     for (int i = 0; i < target->getGrad()->getRows(); ++i)
         for (int j = 0; j < target->getGrad()->getCols(); ++j) {
             auto &g = target->getData();
             g.setCell(i, j, g(i, j) + delta);
+            l2reg->followProp();
             fc->followProp();
+            neurons->followProp();
+            norma->followProp();
             sm->followProp();
             l->followProp();
-            target->getGrad()->setCell(i, j, (l->getData()(0, 0) - f) / delta);
+            loss->followProp();
+            target->getGrad()->setCell(i, j, (loss->getData()(0, 0) - f) / delta);
             g.setCell(i, j, g(i, j) - delta);
         }
     Matrix2D num = *target->getGrad();
     Matrix2D difference(num.getRows(), num.getCols());
     for (int i = 0; i < num.getRows(); ++i)
         for (int j = 0; j < num.getCols(); ++j)
-            difference.setCell(i,j,num(i,j) - anal(i,j));
-
+            difference.setCell(i, j, num(i, j) - anal(i, j));
 }
