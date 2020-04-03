@@ -23,7 +23,7 @@ class ClassificationNN : public NeuralNetwork {
     void ClearGradients();
     std::map<char, std::shared_ptr<Matrix2D>> HyperParams;
 
-    explicit ClassificationNN(std::vector<u32> &&layers, Dataset &dataset);
+    explicit ClassificationNN(std::vector<s32> &&layers, Dataset &dataset);
     f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);
     f32 GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample);
     void ModifyParam(char param_name, f32 value) override;
