@@ -90,9 +90,9 @@ void LayerBatchNormalization::backProp() {
         xb.EachCellOperator(d_variance, left.getData(), mean, d_mean, [](const f32 dv, const f32 x, const f32 m, const f32 dm) -> f32 {
             return dv * 2.f * (x - m) + dm;
         });
-        g.EachCellOperator(d_xb, variance, xb, size, [](const f32 dxb, const f32 v, const f32 xb, const f32 s) -> f32 {
-            return dxb / sqrtf(v) + xb / s;
-        }, &grad);
+        g.EachCellOperator(d_xb, variance, xb, size, [](const f32 dxb, const f32 v, const f32 xbr, const f32 s) -> f32 {
+            return dxb / sqrtf(v) + xbr / s;
+        });
     }
 }
 
