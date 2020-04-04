@@ -12,7 +12,7 @@ class LayerStableSoftMax : public LayerDynamic {
     void followProp() override;
     void backProp() override;
 public:
-    explicit LayerStableSoftMax(Layer &left, bool rowOriented);
+    explicit LayerStableSoftMax(Layer &left, bool rowOriented = true);
 };
 
 

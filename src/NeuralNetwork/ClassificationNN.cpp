@@ -93,7 +93,6 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
     IO = {Input, Output};
     // Setting hyper-parameter layers
     auto L2RegParam = ADD_LAYER(new LayerData(*HyperParams['r']));
-    L2RegularizationLayer = L2RegParam;
 
     std::vector<std::shared_ptr<Layer>> RegularizationLayers;
     // Initializing NN layers
@@ -104,18 +103,16 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
                 new LayerWeights(InputNeurons->getData().getCols(), static_cast<size_t>(outputs),
                                  new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                                  new GradientDescentAdam)); // [inputs x outputs]
-        WeightsLayers.emplace_back(Weights);
         auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*InputNeurons, *Weights)); // [batch_size x outputs]
         auto Biases = ADD_LAYER(
                 new LayerWeights(1, static_cast<size_t>(outputs),
                                  new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                                  new GradientDescentAdam)); // [1 x outputs]
-        WeightsLayers.emplace_back(Biases);
         auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
         // Batch Normalization
-        //auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons));
+        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, new GradientDescentAdam));
         // ReLU
-        auto ReLU = ADD_LAYER(new LayerLeakyReLU(*Neurons));
+        auto ReLU = ADD_LAYER(new LayerLeakyReLU(*BatchNormalization));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
         RegularizationLayers.push_back(L2Regularization);
         auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
@@ -128,14 +125,12 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
             new LayerWeights(InputNeurons->getData().getCols(), dataset.GetOutputs(),
                              new InitializerXavier(static_cast<f32>(dataset.GetInputs())),
                              new GradientDescentAdam));
-    WeightsLayers.emplace_back(Weights);
     auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*InputNeurons, *Weights)); // [batch_size x outputs]
 
     auto Biases = ADD_LAYER(
             new LayerWeights(1, FullyConnected->getData().getCols(),
                              new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                              new GradientDescentAdam)); // [1 x outputs]
-    WeightsLayers.emplace_back(Biases);
     auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
 
     auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
@@ -237,14 +232,6 @@ void ClassificationNN::ClearGradients() {
 
 void ClassificationNN::GradientDescent() {
     // Perform gradient descent
-    for (auto &Weight : WeightsLayers)
+    for (auto &Weight : Layers)
         Weight->subGrad(GET_PARAM('l'));
-}
-
-void ClassificationNN::Serialize(const char *filename) {
-    std::ofstream out(filename);
-    for (auto &W : WeightsLayers)
-        for (size_t j = 0; j < W->getData().getCols(); ++j)
-            for (size_t i = 0; i < W->getData().getRows(); ++i)
-                out << W->getData()(i, j) << std::endl;
 }

@@ -1,4 +1,4 @@
-#include "../../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentMomentum.h"
+#include "../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentMomentum.h"
 
 void GradientDescentMomentum::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
     if (!velocity)

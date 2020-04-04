@@ -10,7 +10,7 @@ class LayerClassificationAccuracy : public LayerDynamic {
     Matrix2D maxProb;
     bool RowOriented;
 public:
-    LayerClassificationAccuracy(Layer &left, Layer &right, bool rowOriented);
+    LayerClassificationAccuracy(Layer &left, Layer &right, bool rowOriented = true);
     void followProp() override;
     void backProp() override;
 };

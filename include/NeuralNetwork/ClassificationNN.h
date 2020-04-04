@@ -11,10 +11,8 @@ class ClassificationNN : public NeuralNetwork {
     Dataset &DataSet;
 
     std::vector<std::shared_ptr<Layer>> Layers;
-    std::vector<std::shared_ptr<Layer>> WeightsLayers;
     std::shared_ptr<Layer> LossFunction;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> AccuracyLayer;
-    std::shared_ptr<Layer> L2RegularizationLayer;
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> IO;
     std::vector<f32> annealLossValues;
     void ForwardPropagation(Layer *stop_layer = nullptr);
@@ -34,7 +32,6 @@ public:
     explicit ClassificationNN(Dataset &dataset, Args &&... args): ClassificationNN({std::forward<Args>(args)...}, dataset) {
     }
 
-    void Serialize(const char *filename) override;
     void AdaptLearningRate();
 };
 

@@ -1,5 +1,5 @@
 #include <cmath>
-#include "../../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentAdaGrad.h"
+#include "../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentAdaGrad.h"
 
 void GradientDescentAdaGrad::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
     if (!accumulated)

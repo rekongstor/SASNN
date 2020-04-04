@@ -1,5 +1,5 @@
 #include <cmath>
-#include "../../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentRMSProp.h"
+#include "../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentRMSProp.h"
 
 void GradientDescentRMSProp::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
     if (!accumulated)
