@@ -48,14 +48,15 @@ int main(int argc, const char *argv[]) {
 
 
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    ClassificationNN classificationNn(datasetStandard,128,32);
+    ClassificationNN classificationNn(datasetStandard,300,100);
 
     Dataset &dataset = datasetStandard;
     dataset.PreprocessMean();
     NeuralNetwork &NN = classificationNn;
-    NN.ModifyParam('l', 0.0001f);
-    NN.ModifyParam('r', 10.0f);
-    for (int i = 0; i < 200; ++i) {
+    NN.ModifyParam('l', 0.00003f);
+    NN.ModifyParam('r', 1.0f);
+    NN.ModifyParam('a', 0.5f);
+    for (int i = 0; i < 80; ++i) {
         auto[train_acc, val_acc] = NN.Train();
         printf("Accuracy Train/Validation: [%.2f]/[%.2f] Diff: %.2f\n", train_acc, val_acc, train_acc - val_acc);
     }

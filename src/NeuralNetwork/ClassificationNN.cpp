@@ -69,7 +69,7 @@ void ClassificationNN::AdaptLearningRate() {
     }
     a = top / btm;
     //printf("Front: %f; Back: %f Mean: %f; a:%f\n", annealLossValues.front(), annealLossValues.back(), annMean, a);
-    if (annealLossValues.front() < annMean || a > -0.05f) {
+    if (annealLossValues.front() < annMean || a > 0.0f) {
         ModifyParam('l', GET_PARAM('l') * GET_PARAM('a'));
         printf("Loss is growing! Learning rate was decreased! Current value: %f\n", GET_PARAM('l'));
     } else if (a < -0.1f) {
@@ -80,10 +80,10 @@ void ClassificationNN::AdaptLearningRate() {
 
 ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
-    ADD_PARAM('l', 0.0001f); // Learning rate
-    ADD_PARAM('r', 40.f); // Regularization
-    ADD_PARAM('s', 20.f); // Steps
-    ADD_PARAM('a', 0.95f); // Annealing multiplier
+    ADD_PARAM('l', 0.0003f); // Learning rate
+    ADD_PARAM('r', 1.f); // Regularization
+    ADD_PARAM('s', 50.f); // Steps
+    ADD_PARAM('a', 0.5f); // Annealing multiplier
     annealLossValues.resize(std::round(GET_PARAM('s')));
 
     // Setting dataset layers
