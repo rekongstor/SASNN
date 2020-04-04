@@ -13,11 +13,10 @@ void LayerLeakyReLU::backProp() {
             return l <= 0.f ? r : 1.f;
         }, &grad);
     }
-    // right is a hyper-parameter and will not be changer with gradient descent
 }
 
 LayerLeakyReLU::LayerLeakyReLU(Layer &left, f32 leak) : LayerDynamic(left.getData().getRows(), left.getData().getCols()),
-                                                            left(left),
-                                                            leak(leak) {
+                                                            leak(leak),
+                                                            left(left) {
 
 }

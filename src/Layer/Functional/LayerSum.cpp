@@ -9,13 +9,13 @@ void LayerSum::followProp() {
 void LayerSum::backProp() {
     if (left.getGrad() != nullptr) {
         Matrix2D &g = *left.getGrad();
-        g.EachCellOperator(data, [](const f32 l) -> f32 {
+        g.EachCellOperator(data, [](const f32) -> f32 {
             return 1.f;
         }, &grad);
     }
     if (right.getGrad() != nullptr) {
         Matrix2D &g = *right.getGrad();
-        g.EachCellOperator(data, [](const f32 l) -> f32 {
+        g.EachCellOperator(data, [](const f32) -> f32 {
             return 1.f;
         }, &grad);
     }

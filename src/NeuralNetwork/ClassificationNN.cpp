@@ -62,12 +62,12 @@ void ClassificationNN::AdaptLearningRate() {
     f32 y_avr = annMean;
     f32 top = 0.f, btm = 0.f;
     f32 a;
-    for (int i = 0; i < annealLossValues.size(); ++i) {
+    for (size_t i = 0; i < annealLossValues.size(); ++i) {
         top += (static_cast<f32>(i) - x_avr) * (annealLossValues[i] - y_avr);
         btm += (static_cast<f32>(i) - x_avr) * (static_cast<f32>(i) - x_avr);
     }
     a = top / btm;
-    //printf("Front: %f; Back: %f Mean: %f; a:%f\n", annealLossValues.front(), annealLossValues.back(), annMean, a);
+
     if (annealLossValues.front() < annMean || a > 0.0f) {
         ModifyParam('l', GET_PARAM('l') * GET_PARAM('a'));
         printf("Loss is growing! Learning rate was decreased! Current value: %f\n", GET_PARAM('l'));
