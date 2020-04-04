@@ -18,9 +18,7 @@ void LayerData::clearGrad() {
 }
 
 void LayerData::transposeData() {
-#if (DEBUG_LEVEL > 0)
-    throw std::runtime_error("Constant data could not be transposed");
-#endif
+
 }
 
 void LayerData::assignData(const Matrix2D *d) {

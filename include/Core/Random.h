@@ -9,6 +9,7 @@ protected:
     explicit Random(u64 seed);
 public:
     virtual f32 Next() = 0;
+    virtual ~Random() = default;
 };
 
 

@@ -16,7 +16,7 @@ void LayerClassificationAccuracy::backProp() {
 }
 
 LayerClassificationAccuracy::LayerClassificationAccuracy(Layer &left, Layer &right, bool rowOriented) : LayerDynamic(1, 1),
-                                                                                                        maxProb(left.getData().getRows(), left.getData().getCols()),
                                                                                                         left(left),
                                                                                                         right(right),
+                                                                                                        maxProb(left.getData().getRows(), left.getData().getCols()),
                                                                                                         RowOriented(rowOriented) {}

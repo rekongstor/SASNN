@@ -1,7 +1,7 @@
 #include "../../include/Core/Random.h"
 #include <ctime>
 
-Random::Random(u64 seed) : engine(seed) {
+Random::Random(u64 seed) : engine(static_cast<u32>(seed)) {
 }
 
 

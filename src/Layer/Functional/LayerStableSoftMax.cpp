@@ -34,10 +34,10 @@ LayerStableSoftMax::LayerStableSoftMax(Layer &left, bool rowOriented) : LayerDyn
                                                                         left(left),
                                                                         Es(rowOriented ? left.getData().getRows() : 1,
                                                                            rowOriented ? 1 : left.getData().getCols()),
-                                                                        RowOriented(rowOriented),
                                                                         maxData(rowOriented ? left.getData().getRows() : 1,
                                                                                 rowOriented ? 1 : left.getData().getCols()),
                                                                         normalizedData(rowOriented ? left.getData().getRows() : left.getData().getCols(),
-                                                                                       rowOriented ? left.getData().getCols() : left.getData().getRows()) {
+                                                                                       rowOriented ? left.getData().getCols() : left.getData().getRows()),
+                                                                        RowOriented(rowOriented){
 
 }

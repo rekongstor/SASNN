@@ -5,9 +5,9 @@ void LayerDynamic::clearGrad() {
     grad.Clean();
 }
 
-LayerDynamic::LayerDynamic(size_t rows, size_t cols) : data(rows, cols),
-                                                       grad(rows, cols, true),
-                                                       Layer(data) {
+LayerDynamic::LayerDynamic(size_t rows, size_t cols) : Layer(data),
+                                                       data(rows, cols),
+                                                       grad(rows, cols, true) {
 }
 
 Matrix2D *LayerDynamic::getGrad() {

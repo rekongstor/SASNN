@@ -164,14 +164,14 @@ void Matrix2D::MergeCellsOperator(const Matrix2D &left, f32 (*functor)(const f32
 }
 
 void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
-    s64 i_max = left.getRows();
-    s64 j_max = right.getCols();
-    s64 k_max = left.getCols();
+    s64 i_max = static_cast<s64>(left.getRows());
+    s64 j_max = static_cast<s64>(right.getCols());
+    s64 k_max = static_cast<s64>(left.getCols());
 #pragma omp parallel for default (none) shared(i_max, j_max, k_max, left, right)
-    for (s64 i = 0; i < i_max; ++i) {
-        for (size_t j = 0; j < j_max; ++j) {
+    for (s64 i = 0; i < static_cast<size_t>(i_max); ++i) {
+        for (size_t j = 0; j < static_cast<size_t>(j_max); ++j) {
             f32 tmp = 0.f;
-            for (size_t k = 0; k < k_max; ++k)
+            for (size_t k = 0; k < static_cast<size_t>(k_max); ++k)
                 tmp += left(static_cast<size_t>(i), k) * right(k, j);
             if (incremental)
                 (*this).setCell(static_cast<size_t>(i), j, (*this)(static_cast<size_t>(i), j) + tmp);
@@ -211,17 +211,13 @@ void Matrix2D::setCell(size_t row, size_t col, f32 val) {
             val = -0.f;
 
     if (!transposed) {
-#if (DEBUG_LEVEL > 0)
         if (row >= rows || col >= cols)
             throw std::out_of_range("Matrix2D is out of range");
-#endif
         data[row * cols + col] = val;
         return;
     }
-#if (DEBUG_LEVEL > 0)
     if (col >= rows || row >= cols)
         throw std::out_of_range("Matrix2D is out of range");
-#endif
     data[col * cols + row] = val;
 }
 

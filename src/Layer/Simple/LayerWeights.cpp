@@ -18,7 +18,6 @@ LayerWeights::LayerWeights(size_t rows, size_t cols, DecoratorInitializer *decor
 }
 
 void LayerWeights::subGrad(f32 step) {
-    // Gradient Descent
     gradientDescent->subGrad(data, grad, step);
 }
 
