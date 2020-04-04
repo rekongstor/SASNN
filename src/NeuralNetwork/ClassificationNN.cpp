@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include "../../include/NeuralNetwork/ClassificationNN.h"
 #include "../../include/Layer/Simple/LayerWeights.h"
 #include "../../include/Layer/Simple/LayerData.h"
@@ -84,7 +83,7 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
     ADD_PARAM('r', 1.f); // Regularization
     ADD_PARAM('s', 50.f); // Steps
     ADD_PARAM('a', 0.5f); // Annealing multiplier
-    annealLossValues.resize(std::round(GET_PARAM('s')));
+    annealLossValues.resize(static_cast<size_t>(std::round(GET_PARAM('s'))));
 
     // Setting dataset layers
     auto[train_inputs, train_outputs] = DataSet.GetTrainSample(false);
@@ -158,7 +157,7 @@ void ClassificationNN::ModifyParam(char param_name, f32 value) {
                 std::cout << "Parameter 's' cannot be less than 10!";
                 return;
             } else
-                annealLossValues.resize(std::round(value));
+                annealLossValues.resize(static_cast<size_t>(std::round(value)));
             break;
         case 'a':
             if (value > 1.f) {

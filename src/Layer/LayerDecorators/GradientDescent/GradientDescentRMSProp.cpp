@@ -11,7 +11,7 @@ void GradientDescentRMSProp::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step
     });
 
     weights.EachCellOperator(weights, grad, learningRate, *accumulated, [](const f32 w, const f32 g, const f32 l, const f32 a) -> f32 {
-        return w - l / sqrt(a) * g;
+        return w - l / sqrtf(a) * g;
     });
 }
 

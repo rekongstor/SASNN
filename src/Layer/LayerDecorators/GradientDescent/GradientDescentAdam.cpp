@@ -15,7 +15,7 @@ void GradientDescentAdam::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
         return r * a + (1.f - r) * g * g;
     });
     weights.EachCellOperator(weights, *velocity, learningRate, *accumulated, [](const f32 w, const f32 v, const f32 l, const f32 a) -> f32 {
-        return w - l / sqrt(a) * v;
+        return w - l / sqrtf(a) * v;
     });
 }
 

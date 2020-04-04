@@ -172,11 +172,11 @@ void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
         for (size_t j = 0; j < j_max; ++j) {
             f32 tmp = 0.f;
             for (size_t k = 0; k < k_max; ++k)
-                tmp += left(i, k) * right(k, j);
+                tmp += left(static_cast<size_t>(i), k) * right(k, j);
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + tmp);
+                (*this).setCell(static_cast<size_t>(i), j, (*this)(static_cast<size_t>(i), j) + tmp);
             else
-                (*this).setCell(i, j, tmp);
+                (*this).setCell(static_cast<size_t>(i), j, tmp);
         }
     }
 }
@@ -244,7 +244,7 @@ void Matrix2D::FindColOperator(const Matrix2D &left, f32 neutralValue, bool (*fu
     size_t found_index;
     for (size_t j = 0; j < getCols(); ++j) {
         found_value = neutralValue;
-        found_index = -1;
+        found_index = 0;
         for (size_t i = 0; i < getRows(); ++i)
             if (functor(left(i, j), found_value)) {
                 found_value = left(i, j);
@@ -260,7 +260,7 @@ void Matrix2D::FindRowOperator(const Matrix2D &left, f32 neutralValue, bool (*fu
     size_t found_index;
     for (size_t i = 0; i < getRows(); ++i) {
         found_value = neutralValue;
-        found_index = -1;
+        found_index = 0;
         for (size_t j = 0; j < getCols(); ++j)
             if (functor(left(i, j), found_value)) {
                 found_value = left(i, j);

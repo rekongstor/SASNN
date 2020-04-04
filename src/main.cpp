@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <filesystem>
 #include <string>
 #include "../include/Dataset/DatasetStandard.h"
@@ -23,7 +22,7 @@ int main(int argc, const char *argv[]) {
     }
     if (argc > 2)
         try {
-            batchSize = std::stoi(argv[2]);
+            batchSize = static_cast<size_t>(std::stoi(argv[2]));
         }
         catch (std::exception const &e) {
             std::cout << "Invalid batch size" << argv[2] << std::endl;

@@ -41,9 +41,9 @@ DatasetStandard::DatasetStandard(const char* filename, size_t batchSize, f32 tes
         dataSize = ConvertEndian(dataSize);
     }
 
-    testSamples = dataSize * static_cast<f64>(testCoef);
+    testSamples = static_cast<size_t>(static_cast<f64>(dataSize) * static_cast<f64>(testCoef));
     trainSamples = dataSize - testSamples;
-    validationSamples = trainSamples * static_cast<f64>(validationCoef);
+    validationSamples = static_cast<size_t>(static_cast<f64>(trainSamples) * static_cast<f64>(validationCoef));
     trainSamples = trainSamples - validationSamples;
 
     testSamples /= batchSize;
@@ -131,15 +131,15 @@ std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetS
     return {validation_inputs, validation_outputs};
 }
 
-u32 DatasetStandard::GetInputs() const {
+size_t DatasetStandard::GetInputs() const {
     return inputs;
 }
 
-u32 DatasetStandard::GetOutputs() const {
+size_t DatasetStandard::GetOutputs() const {
     return outputs;
 }
 
-u32 DatasetStandard::GetBatchSize() const {
+size_t DatasetStandard::GetBatchSize() const {
     return batchSize;
 }
 
