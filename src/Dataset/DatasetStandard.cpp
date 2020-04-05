@@ -40,10 +40,23 @@ DatasetStandard::DatasetStandard(const char* filename, size_t batchSize, f32 tes
         outputs = ConvertEndian(outputs);
         dataSize = ConvertEndian(dataSize);
     }
+    if (testCoef < 1.f)
+        testSamples = static_cast<size_t>(static_cast<f64>(dataSize) * static_cast<f64>(testCoef));
+    else
+        if (static_cast<size_t>(testCoef) < dataSize)
+            testSamples = static_cast<size_t>(testCoef);
+        else
+            throw std::runtime_error("Invalid test coef");
 
-    testSamples = static_cast<size_t>(static_cast<f64>(dataSize) * static_cast<f64>(testCoef));
     trainSamples = dataSize - testSamples;
-    validationSamples = static_cast<size_t>(static_cast<f64>(trainSamples) * static_cast<f64>(validationCoef));
+    if (validationCoef < 1.f)
+        validationSamples = static_cast<size_t>(static_cast<f64>(trainSamples) * static_cast<f64>(validationCoef));
+    else
+        if (static_cast<size_t>(validationCoef) < dataSize)
+            validationSamples = static_cast<size_t>(validationCoef);
+        else
+            throw std::runtime_error("Invalid validation coef");
+
     trainSamples = trainSamples - validationSamples;
 
     testSamples /= batchSize;
