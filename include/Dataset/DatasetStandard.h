@@ -6,8 +6,8 @@
 #include "Dataset.h"
 
 class DatasetStandard : public Dataset {
-    size_t inputs = 0; // input vector size
-    size_t outputs = 0; // output vector size
+    u32 inputs = 0; // input vector size
+    u32 outputs = 0; // output vector size
     size_t batchSize;
     size_t currentTrainSample = 0;
     size_t currentValSample = 0;
