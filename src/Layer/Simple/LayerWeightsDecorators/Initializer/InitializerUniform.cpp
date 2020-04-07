@@ -1,5 +1,5 @@
-#include "../../../../include/Layer/Simple/LayerWeightsDecorators/Initializer/InitializerUniform.h"
-#include "../../../../include/Core/Random.h"
+#include "../../../../../include/Core/Random.h"
+#include "../../../../../include/Layer/LayerDecorators/Initializer/InitializerUniform.h"
 
 void InitializerUniform::Initialize(Matrix2D &weights) {
     RandomUniform randomUniform(a, b);

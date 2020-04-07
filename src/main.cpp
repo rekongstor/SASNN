@@ -3,6 +3,7 @@
 #include <string>
 #include "../include/Dataset/DatasetStandard.h"
 #include "../include/NeuralNetwork/ClassificationNN.h"
+#include "../include/NeuralNetwork/RegressionNN.h"
 
 const char *fileName = "";
 size_t batchSize = 512;
@@ -47,11 +48,11 @@ int main(int argc, const char *argv[]) {
 
 
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    ClassificationNN classificationNn(datasetStandard,300,100);
+    RegressionNN regressionNN(datasetStandard, 64, 64);
 
     Dataset &dataset = datasetStandard;
     dataset.PreprocessMean();
-    NeuralNetwork &NN = classificationNn;
+    NeuralNetwork &NN = regressionNN;
     NN.ModifyParam('l', 0.00003f);
     NN.ModifyParam('r', 1.0f);
     NN.ModifyParam('a', 0.5f);

@@ -1,5 +1,6 @@
 #include <cmath>
-#include "../../../../include/Layer/Simple/LayerWeightsDecorators/GradientDescent/GradientDescentAdam.h"
+#include "../../../../../include/Layer/LayerDecorators/GradientDescent/GradientDescentAdam.h"
+
 
 void GradientDescentAdam::subGrad(Matrix2D &weights, Matrix2D &grad, f32 step) {
     if (!velocity)

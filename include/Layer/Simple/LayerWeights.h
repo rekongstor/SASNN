@@ -4,8 +4,8 @@
 #include <memory>
 #include "../../Core/Random.h"
 #include "../Abstract/LayerDynamic.h"
-#include "LayerWeightsDecorators/DecoratorGradientDescent.h"
-#include "LayerWeightsDecorators/DecoratorInitializer.h"
+#include "../LayerDecorators/DecoratorGradientDescent.h"
+#include "../LayerDecorators/DecoratorInitializer.h"
 
 class LayerWeights : public LayerDynamic {
     void backProp() override;

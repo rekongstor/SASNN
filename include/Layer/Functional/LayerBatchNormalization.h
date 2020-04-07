@@ -3,7 +3,8 @@
 
 #include <memory>
 #include "../Abstract/LayerDynamic.h"
-#include "../Simple/LayerWeightsDecorators/DecoratorGradientDescent.h"
+#include "../LayerDecorators/DecoratorGradientDescent.h"
+
 
 class LayerBatchNormalization : public LayerDynamic {
     Layer& left;

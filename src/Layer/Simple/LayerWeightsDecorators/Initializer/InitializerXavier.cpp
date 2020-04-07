@@ -1,5 +1,6 @@
-#include "../../../../include/Layer/Simple/LayerWeightsDecorators/Initializer/InitializerXavier.h"
-#include "../../../../include/Core/Random.h"
+
+#include "../../../../../include/Core/Random.h"
+#include "../../../../../include/Layer/LayerDecorators/Initializer/InitializerXavier.h"
 
 void InitializerXavier::Initialize(Matrix2D &weights) {
     RandomGaussian randomGaussian = RandomGaussian(

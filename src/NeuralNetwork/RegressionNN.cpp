@@ -1,12 +1,14 @@
 #include <iostream>
-#include "../../include/NeuralNetwork/ClassificationNN.h"
+#include "../../include/NeuralNetwork/RegressionNN.h"
 #include "../../include/Layer/Simple/LayerWeights.h"
 #include "../../include/Layer/Simple/LayerData.h"
 #include "../../include/Layer/Functional/LayerStableSoftMax.h"
 #include "../../include/Layer/Functional/LayerCrossEntropyLoss.h"
 #include "../../include/Layer/Functional/LayerFullyConnected.h"
 #include "../../include/Layer/Functional/LayerL2Reg.h"
+#include "../../include/Layer/Functional/LayerLeastSquaresRegression.h"
 #include "../../include/Layer/Accuracy/LayerClassificationAccuracy.h"
+#include "../../include/Layer/Accuracy/LayerRegressionAccuracy.h"
 #include "../../include/Layer/NLF/LayerLeakyReLU.h"
 #include "../../include/Layer/NLF/LayerReLU.h"
 #include "../../include/Layer/NLF/LayerTanh.h"
@@ -14,6 +16,7 @@
 #include "../../include/Layer/Functional/LayerSum.h"
 #include "../../include/Layer/Functional/LayerBatchNormalization.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerXavier.h"
+#include "../../include/Layer/LayerDecorators/Initializer/InitializerUniform.h"
 #include "../../include/Layer/LayerDecorators/GradientDescent/GradientDescentStochastic.h"
 #include "../../include/Layer/LayerDecorators/GradientDescent/GradientDescentMomentum.h"
 #include "../../include/Layer/LayerDecorators/GradientDescent/GradientDescentAdaGrad.h"
@@ -26,11 +29,11 @@
 #define GET_PARAM(Param) (*HyperParams[ Param ])(0, 0)
 
 
-std::pair<f32, f32> ClassificationNN::Test() {
+std::pair<f32, f32> RegressionNN::Test() {
     return {GetAccuracy(DataSet.GetValidationSamples()), GetAccuracy(DataSet.GetTestSamples())};
 }
 
-std::pair<f32, f32> ClassificationNN::Train() {
+std::pair<f32, f32> RegressionNN::Train() {
     for (u64 i = 0; i < std::round(GET_PARAM('s')); ++i) {
         // Load next batch
         auto[Inputs, Outputs] = IO;
@@ -53,7 +56,7 @@ std::pair<f32, f32> ClassificationNN::Train() {
     return {trainAcc, valAcc};
 }
 
-void ClassificationNN::AdaptLearningRate() {
+void RegressionNN::AdaptLearningRate() {
     f32 annMean = 0.f;
     for (auto &&lv : annealLossValues)
         annMean += lv;
@@ -77,7 +80,7 @@ void ClassificationNN::AdaptLearningRate() {
     }
 }
 
-ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) : DataSet(dataset) {
+RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
     ADD_PARAM('l', 0.0003f); // Learning rate
     ADD_PARAM('r', 1.f); // Regularization
@@ -100,18 +103,18 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
     for (auto outputs : layers) {
         auto Weights = ADD_LAYER(
                 new LayerWeights(InputNeurons->getData().getCols(), static_cast<size_t>(outputs),
-                                 new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
+                                 new InitializerUniform(0.f, .1f),
                                  new GradientDescentAdam)); // [inputs x outputs]
         auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*InputNeurons, *Weights)); // [batch_size x outputs]
         auto Biases = ADD_LAYER(
                 new LayerWeights(1, static_cast<size_t>(outputs),
-                                 new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
+                                 new InitializerUniform(-.1f, .1f),
                                  new GradientDescentAdam)); // [1 x outputs]
         auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
         // Batch Normalization
         auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, new GradientDescentAdam));
         // ReLU
-        auto ReLU = ADD_LAYER(new LayerLeakyReLU(*BatchNormalization));
+        auto ReLU = ADD_LAYER(new LayerSigmoid(*BatchNormalization));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
         RegularizationLayers.push_back(L2Regularization);
         auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
@@ -122,13 +125,13 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
     // Classification Layer
     auto Weights = ADD_LAYER(
             new LayerWeights(InputNeurons->getData().getCols(), dataset.GetOutputs(),
-                             new InitializerXavier(static_cast<f32>(dataset.GetInputs())),
+                             new InitializerUniform(0.f, .1f),
                              new GradientDescentAdam));
     auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*InputNeurons, *Weights)); // [batch_size x outputs]
 
     auto Biases = ADD_LAYER(
             new LayerWeights(1, FullyConnected->getData().getCols(),
-                             new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
+                             new InitializerUniform(-.1f, .1f),
                              new GradientDescentAdam)); // [1 x outputs]
     auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
 
@@ -138,19 +141,19 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
     RegularizationLayers.push_back(L2RegularizationBias);
 
     // Setting Loss function
-    auto SoftMax = ADD_LAYER(new LayerStableSoftMax(*Neurons, true));
-    auto CrossEntropyLoss = ADD_LAYER(new LayerCrossEntropyLoss(*SoftMax, *Output));
-    std::shared_ptr<Layer> Loss = CrossEntropyLoss;
+    //auto SoftMax = ADD_LAYER(new LayerStableSoftMax(*Neurons, true));
+    auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*Neurons, *Output));
+    std::shared_ptr<Layer> Loss = Regression;
     for (auto &&RL : RegularizationLayers)
         Loss = ADD_LAYER(new LayerSum(*Loss, *RL.get()));
 
     LossFunction = Loss;
 
     // Setting Accuracy layer
-    AccuracyLayer = {std::dynamic_pointer_cast<Layer>(std::make_shared<LayerClassificationAccuracy>(*SoftMax, *Output, true)), SoftMax};
+    AccuracyLayer = {std::dynamic_pointer_cast<Layer>(std::make_shared<LayerRegressionAccuracy>(*Neurons, *Output, true)), Neurons};
 }
 
-void ClassificationNN::ModifyParam(char param_name, f32 value) {
+void RegressionNN::ModifyParam(char param_name, f32 value) {
     switch (param_name) {
         case 's':
             if (std::round(value) < 10) {
@@ -179,7 +182,7 @@ void ClassificationNN::ModifyParam(char param_name, f32 value) {
 
 }
 
-f32 ClassificationNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples) {
+f32 RegressionNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples) {
     auto[inputs, outputs] = samples;
     f32 accuracy = 0.f;
     for (size_t i = 0; i < inputs.size(); ++i) {
@@ -194,7 +197,7 @@ f32 ClassificationNN::GetAccuracy(std::pair<const std::vector<Matrix2D> &, const
     return accuracy;
 }
 
-f32 ClassificationNN::GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample) {
+f32 RegressionNN::GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample) {
     auto[inputs, outputs] = sample;
     auto[Inputs, Outputs] = IO;
     Inputs->assignData(&inputs);
@@ -203,11 +206,16 @@ f32 ClassificationNN::GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> 
     AccuracyLayer.first->followProp();
     f32 accuracy = AccuracyLayer.first->getData()(0, 0);
     accuracy /= static_cast<f32>(DataSet.GetBatchSize());
+    auto &p = AccuracyLayer.second->getData();
+    auto &t = Outputs->getData();
+    printf("P{%.2f %.2f %.2f %.2f} T{%.2f %.2f %.2f %.2f}\n",
+           p(0, 0), p(0, 1), p(0, 2), p(0, 3),
+           t(0, 0), t(0, 1), t(0, 2), t(0, 3));
     return accuracy;
 }
 
 
-void ClassificationNN::ForwardPropagation(Layer *stop_layer) {
+void RegressionNN::ForwardPropagation(Layer *stop_layer) {
     // Forward propagation
     for (auto &Layer : Layers) {
         Layer->followProp();
@@ -216,20 +224,20 @@ void ClassificationNN::ForwardPropagation(Layer *stop_layer) {
     }
 }
 
-void ClassificationNN::BackPropagation() {
+void RegressionNN::BackPropagation() {
     // Back propagation
     LossFunction->getGrad()->Fill(1.f);
     for (auto it = Layers.rbegin(); it != Layers.rend(); ++it)
         (*it)->backProp();
 }
 
-void ClassificationNN::ClearGradients() {
+void RegressionNN::ClearGradients() {
     // Clear gradients
     for (auto &Layer : Layers)
         Layer->clearGrad();
 }
 
-void ClassificationNN::GradientDescent() {
+void RegressionNN::GradientDescent() {
     // Perform gradient descent
     for (auto &Weight : Layers)
         Weight->subGrad(GET_PARAM('l'));
