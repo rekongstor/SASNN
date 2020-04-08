@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "../../include/NeuralNetwork/RegressionNN.h"
 #include "../../include/Layer/Simple/LayerWeights.h"
 #include "../../include/Layer/Simple/LayerData.h"
@@ -103,13 +104,15 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     for (auto outputs : layers) {
         auto Weights = ADD_LAYER(
                 new LayerWeights(InputNeurons->getData().getCols(), static_cast<size_t>(outputs),
-                                 new InitializerUniform(0.f, .1f),
+                                 new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                                  new GradientDescentAdam)); // [inputs x outputs]
         auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*InputNeurons, *Weights)); // [batch_size x outputs]
         auto Biases = ADD_LAYER(
                 new LayerWeights(1, static_cast<size_t>(outputs),
-                                 new InitializerUniform(-.1f, .1f),
+                                 new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                                  new GradientDescentAdam)); // [1 x outputs]
+        WeightLayers.push_back(Weights);
+        WeightLayers.push_back(Biases);
         auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
         // Batch Normalization
         auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, new GradientDescentAdam));
@@ -125,14 +128,16 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     // Classification Layer
     auto Weights = ADD_LAYER(
             new LayerWeights(InputNeurons->getData().getCols(), dataset.GetOutputs(),
-                             new InitializerUniform(0.f, .1f),
+                             new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                              new GradientDescentAdam));
     auto FullyConnected = ADD_LAYER(new LayerFullyConnected(*InputNeurons, *Weights)); // [batch_size x outputs]
 
     auto Biases = ADD_LAYER(
             new LayerWeights(1, FullyConnected->getData().getCols(),
-                             new InitializerUniform(-.1f, .1f),
+                             new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                              new GradientDescentAdam)); // [1 x outputs]
+    WeightLayers.push_back(Weights);
+    WeightLayers.push_back(Biases);
     auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
 
     auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
@@ -141,8 +146,8 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     RegularizationLayers.push_back(L2RegularizationBias);
 
     // Setting Loss function
-    //auto SoftMax = ADD_LAYER(new LayerStableSoftMax(*Neurons, true));
-    auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*Neurons, *Output));
+    auto SoftMax = ADD_LAYER(new LayerStableSoftMax(*Neurons));
+    auto Regression = ADD_LAYER(new LayerCrossEntropyLoss(*SoftMax, *Output));
     std::shared_ptr<Layer> Loss = Regression;
     for (auto &&RL : RegularizationLayers)
         Loss = ADD_LAYER(new LayerSum(*Loss, *RL.get()));
@@ -150,7 +155,7 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     LossFunction = Loss;
 
     // Setting Accuracy layer
-    AccuracyLayer = {std::dynamic_pointer_cast<Layer>(std::make_shared<LayerRegressionAccuracy>(*Neurons, *Output, true)), Neurons};
+    AccuracyLayer = {std::dynamic_pointer_cast<Layer>(std::make_shared<LayerRegressionAccuracy>(*SoftMax, *Output, true)), SoftMax};
 }
 
 void RegressionNN::ModifyParam(char param_name, f32 value) {
@@ -208,9 +213,9 @@ f32 RegressionNN::GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> samp
     accuracy /= static_cast<f32>(DataSet.GetBatchSize());
     auto &p = AccuracyLayer.second->getData();
     auto &t = Outputs->getData();
-    printf("P{%.2f %.2f %.2f %.2f} T{%.2f %.2f %.2f %.2f}\n",
-           p(0, 0), p(0, 1), p(0, 2), p(0, 3),
-           t(0, 0), t(0, 1), t(0, 2), t(0, 3));
+    printf("P{%.2f %.2f %.2f %.2f}\nT{%.2f %.2f %.2f %.2f}\n",
+           p(0, 0), p(1, 0), p(2, 0), p(3, 0),
+           t(0, 0), t(1, 0), t(2, 0), t(3, 0));
     return accuracy;
 }
 
@@ -241,4 +246,24 @@ void RegressionNN::GradientDescent() {
     // Perform gradient descent
     for (auto &Weight : Layers)
         Weight->subGrad(GET_PARAM('l'));
+}
+
+void RegressionNN::Serialize(const char *filename) {
+    std::ofstream out(filename, std::ios::binary);
+    // u32 layers
+    // [for each layer]
+    // u32 rows
+    // u32 cols
+    // f32 [data]
+    u32 layers = WeightLayers.size();
+    out.write((const char *) &layers, sizeof(u32));
+    for (auto&& p : WeightLayers) {
+        auto &L = *p;
+        u32 r = L.getData().getRows();
+        u32 c = L.getData().getCols();
+
+        out.write((const char *) &r, sizeof(u32));
+        out.write((const char *) &c, sizeof(u32));
+        out.write((const char *) &(L.getData()(0, 0)), r * c * sizeof(f32));
+    }
 }

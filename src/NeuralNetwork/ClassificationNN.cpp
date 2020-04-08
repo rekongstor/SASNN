@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "../../include/NeuralNetwork/ClassificationNN.h"
 #include "../../include/Layer/Simple/LayerWeights.h"
 #include "../../include/Layer/Simple/LayerData.h"
@@ -107,6 +108,8 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
                 new LayerWeights(1, static_cast<size_t>(outputs),
                                  new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                                  new GradientDescentAdam)); // [1 x outputs]
+        WeightLayers.push_back(Weights);
+        WeightLayers.push_back(Biases);
         auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
         // Batch Normalization
         auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, new GradientDescentAdam));
@@ -130,6 +133,8 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
             new LayerWeights(1, FullyConnected->getData().getCols(),
                              new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
                              new GradientDescentAdam)); // [1 x outputs]
+    WeightLayers.push_back(Weights);
+    WeightLayers.push_back(Biases);
     auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
 
     auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
@@ -233,4 +238,24 @@ void ClassificationNN::GradientDescent() {
     // Perform gradient descent
     for (auto &Weight : Layers)
         Weight->subGrad(GET_PARAM('l'));
+}
+
+void ClassificationNN::Serialize(const char *filename) {
+    std::ofstream out(filename, std::ios::binary);
+    // u32 layers
+    // [for each layer]
+    // u32 rows
+    // u32 cols
+    // f32 [data]
+    u32 layers = WeightLayers.size();
+    out.write((const char *) &layers, sizeof(u32));
+    for (auto&& p : WeightLayers) {
+        auto &L = *p;
+        u32 r = L.getData().getRows();
+        u32 c = L.getData().getCols();
+
+        out.write((const char *) &r, sizeof(u32));
+        out.write((const char *) &c, sizeof(u32));
+        out.write((const char *) &(L.getData()(0, 0)), r * c * sizeof(f32));
+    }
 }

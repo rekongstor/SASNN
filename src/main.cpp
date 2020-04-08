@@ -48,13 +48,13 @@ int main(int argc, const char *argv[]) {
 
 
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    RegressionNN regressionNN(datasetStandard, 64, 64);
+    RegressionNN regressionNN(datasetStandard, 32, 32, 32, 32, 32, 32);
 
     Dataset &dataset = datasetStandard;
-    dataset.PreprocessMean();
+    //dataset.PreprocessMean();
     NeuralNetwork &NN = regressionNN;
-    NN.ModifyParam('l', 0.00003f);
-    NN.ModifyParam('r', 1.0f);
+    NN.ModifyParam('l', 0.0003f);
+    NN.ModifyParam('r', 10.0f);
     NN.ModifyParam('a', 0.5f);
     for (int i = 0; i < 80; ++i) {
         auto[train_acc, val_acc] = NN.Train();
@@ -62,6 +62,7 @@ int main(int argc, const char *argv[]) {
     }
     auto[val_acc, test_acc] = NN.Test();
     printf("Accuracy Validation/Test: [%.4f]/[%.4f] Diff: %.4f\n", val_acc, test_acc, static_cast<f64>(val_acc) - test_acc);
+    NN.Serialize("SAS.NN");
     system("pause");
     return 0;
 }

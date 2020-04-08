@@ -20,11 +20,14 @@ class ClassificationNN : public NeuralNetwork {
     void GradientDescent();
     void ClearGradients();
     std::map<char, std::shared_ptr<Matrix2D>> HyperParams;
+    std::vector<std::shared_ptr<Layer>> WeightLayers;
 
     explicit ClassificationNN(std::vector<s32> &&layers, Dataset &dataset);
     f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);
     f32 GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample);
     void ModifyParam(char param_name, f32 value) override;
+    void AdaptLearningRate();
+    void Serialize(const char *filename) override;
     std::pair<f32, f32> Test() override;
     std::pair<f32, f32> Train() override;
 public:
@@ -32,7 +35,6 @@ public:
     explicit ClassificationNN(Dataset &dataset, Args &&... args): ClassificationNN({std::forward<Args>(args)...}, dataset) {
     }
 
-    void AdaptLearningRate();
 };
 
 
