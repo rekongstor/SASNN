@@ -259,3 +259,11 @@ void ClassificationNN::Serialize(const char *filename) {
         out.write((const char *) &(L.getData()(0, 0)), r * c * sizeof(f32));
     }
 }
+
+void ClassificationNN::Deserialize(const char *) {
+
+}
+
+void ClassificationNN::Use(Matrix2D &in, Matrix2D &out) {
+
+}

@@ -10,6 +10,31 @@ size_t batchSize = 512;
 f32 testCoef = 0.1f;
 f32 validationCoef = 0.1f;
 
+void SerializeNN(NeuralNetwork &NN, const char *filename) {
+    NN.Serialize(filename);
+}
+
+void DeserializeNN(NeuralNetwork &NN, const char *filename) {
+    NN.Deserialize(filename);
+}
+
+void TrainNN(NeuralNetwork &NN) {
+    NN.ModifyParam('l', 0.0003f);
+    NN.ModifyParam('r', 1.0f);
+    NN.ModifyParam('a', 0.5f);
+    for (int i = 0; i < 80; ++i) {
+        auto[train_acc, val_acc] = NN.Train();
+        printf("Accuracy Train/Validation: [%.4f]/[%.4f] Diff: %.4f\n", train_acc, val_acc, static_cast<f64>(train_acc) - val_acc);
+    }
+    auto[val_acc, test_acc] = NN.Test();
+    printf("Accuracy Validation/Test: [%.4f]/[%.4f] Diff: %.4f\n", val_acc, test_acc, static_cast<f64>(val_acc) - test_acc);
+    NN.Serialize("SAS.NN");
+}
+
+void UseNN(NeuralNetwork &NN, Matrix2D &input, Matrix2D &out) {
+    NN.Use(input,out);
+}
+
 int main(int argc, const char *argv[]) {
     if (argc < 2) {
         std::cout << "Please specify an input file" << std::endl;
@@ -45,24 +70,25 @@ int main(int argc, const char *argv[]) {
             std::cout << "Invalid validation coef" << argv[3] << std::endl;
             return 4;
         }
-
-
     DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    RegressionNN regressionNN(datasetStandard, 32, 32, 32, 32, 32, 32);
-
     Dataset &dataset = datasetStandard;
     //dataset.PreprocessMean();
-    NeuralNetwork &NN = regressionNN;
-    NN.ModifyParam('l', 0.0003f);
-    NN.ModifyParam('r', 10.0f);
-    NN.ModifyParam('a', 0.5f);
-    for (int i = 0; i < 80; ++i) {
-        auto[train_acc, val_acc] = NN.Train();
-        printf("Accuracy Train/Validation: [%.2f]/[%.2f] Diff: %.2f\n", train_acc, val_acc, static_cast<f64>(train_acc) - val_acc);
+
+    RegressionNN regressionNN(datasetStandard, 32, 32, 32, 32);
+
+    {
+        TrainNN(regressionNN);
+        SerializeNN(regressionNN, "SAS.NN");
     }
-    auto[val_acc, test_acc] = NN.Test();
-    printf("Accuracy Validation/Test: [%.4f]/[%.4f] Diff: %.4f\n", val_acc, test_acc, static_cast<f64>(val_acc) - test_acc);
-    NN.Serialize("SAS.NN");
-    system("pause");
+//    {
+//        DeserializeNN(regressionNN, "SAS.NN");
+//        Matrix2D in(1, 6);
+//        f32 src[] = {0.11,0.69,0.29,0.10,-0.75,0.83};
+//        in.AssignData(src);
+//        Matrix2D out(1, 2);
+//        UseNN(regressionNN, in, out);
+//        std::cout << out(0,0);
+//    }
+
     return 0;
 }

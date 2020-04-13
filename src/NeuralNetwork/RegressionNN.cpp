@@ -124,7 +124,11 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
         RegularizationLayers.push_back(L2RegularizationBias);
         InputNeurons = ReLU;
     }
-
+// 32х32 1024 х 0;1
+// 0 0 0 0 0 0 0 0 0 0 1
+// 6 х [-1;1]
+// 4 x [0;1]
+// p1 0;1  p2 0;1; p1 = 1 - p2
     // Classification Layer
     auto Weights = ADD_LAYER(
             new LayerWeights(InputNeurons->getData().getCols(), dataset.GetOutputs(),
@@ -138,7 +142,7 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
                              new GradientDescentAdam)); // [1 x outputs]
     WeightLayers.push_back(Weights);
     WeightLayers.push_back(Biases);
-    auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
+    auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases)); // 4: -inf +inf; Sigmoid (0;+1)
 
     auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
     RegularizationLayers.push_back(L2Regularization);
@@ -266,4 +270,31 @@ void RegressionNN::Serialize(const char *filename) {
         out.write((const char *) &c, sizeof(u32));
         out.write((const char *) &(L.getData()(0, 0)), r * c * sizeof(f32));
     }
+}
+
+void RegressionNN::Deserialize(const char *filename) {
+    std::ifstream in(filename, std::ios::binary);
+    // u32 layers
+    // [for each layer]
+    // u32 rows
+    // u32 cols
+    // f32 [data]
+    u32 layers = WeightLayers.size();
+    in.read((char *) &layers, sizeof(u32));
+    for (auto&& p : WeightLayers) {
+        auto &L = *p;
+        u32 r = L.getData().getRows();
+        u32 c = L.getData().getCols();
+
+        in.read((char *) &r, sizeof(u32));
+        in.read((char *) &c, sizeof(u32));
+        in.read((char *) &(L.getData()(0, 0)), r * c * sizeof(f32));
+    }
+}
+
+void RegressionNN::Use(Matrix2D &in, Matrix2D &out) {
+    auto[Inputs, Outputs] = IO;
+    Inputs->assignData(&in);
+    ForwardPropagation();
+    out.setCell(0,0,AccuracyLayer.second->getData()(0,0));
 }

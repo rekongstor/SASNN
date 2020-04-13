@@ -21,9 +21,9 @@ class RegressionNN : public NeuralNetwork {
     void ClearGradients();
     std::map<char, std::shared_ptr<Matrix2D>> HyperParams;
     std::vector<std::shared_ptr<Layer>> WeightLayers;
-public:
+    void Deserialize(const char *filename) override;
     void Serialize(const char *filename) override;
-private:
+    void Use(Matrix2D &in, Matrix2D &out) override;
 
     explicit RegressionNN(std::vector<s32> &&layers, Dataset &dataset);
     f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);

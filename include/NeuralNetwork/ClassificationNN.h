@@ -16,6 +16,7 @@ class ClassificationNN : public NeuralNetwork {
     std::pair<std::shared_ptr<Layer>, std::shared_ptr<Layer>> IO;
     std::vector<f32> annealLossValues;
     void ForwardPropagation(Layer *stop_layer = nullptr);
+    void Deserialize(const char *filename) override;
     void BackPropagation();
     void GradientDescent();
     void ClearGradients();
@@ -24,6 +25,9 @@ class ClassificationNN : public NeuralNetwork {
 
     explicit ClassificationNN(std::vector<s32> &&layers, Dataset &dataset);
     f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);
+public:
+    void Use(Matrix2D &in, Matrix2D &out) override;
+private:
     f32 GetAccuracy(std::pair<const Matrix2D &, const Matrix2D &> sample);
     void ModifyParam(char param_name, f32 value) override;
     void AdaptLearningRate();
