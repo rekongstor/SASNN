@@ -15,6 +15,7 @@
 #include "../../include/Layer/NLF/LayerTanh.h"
 #include "../../include/Layer/NLF/LayerSigmoid.h"
 #include "../../include/Layer/Functional/LayerSum.h"
+#include "../../include/Layer/Functional/LayerClamp.h"
 #include "../../include/Layer/Functional/LayerBatchNormalization.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerXavier.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerUniform.h"
@@ -117,7 +118,7 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
         // Batch Normalization
         auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, new GradientDescentAdam));
         // ReLU
-        auto ReLU = ADD_LAYER(new LayerSigmoid(*BatchNormalization));
+        auto ReLU = ADD_LAYER(new LayerLeakyReLU(*BatchNormalization));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
         RegularizationLayers.push_back(L2Regularization);
         auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
@@ -150,8 +151,8 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     RegularizationLayers.push_back(L2RegularizationBias);
 
     // Setting Loss function
-    auto SoftMax = ADD_LAYER(new LayerStableSoftMax(*Neurons));
-    auto Regression = ADD_LAYER(new LayerCrossEntropyLoss(*SoftMax, *Output));
+    auto SoftMax = ADD_LAYER(new LayerClamp(*Neurons, 0.f, 1.f));
+    auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*SoftMax, *Output));
     std::shared_ptr<Layer> Loss = Regression;
     for (auto &&RL : RegularizationLayers)
         Loss = ADD_LAYER(new LayerSum(*Loss, *RL.get()));

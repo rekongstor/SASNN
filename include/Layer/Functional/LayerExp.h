@@ -5,12 +5,10 @@
 
 class LayerExp : public LayerDynamic {
     Layer &left;
-public:
-    explicit LayerExp(Layer &left);
-private:
     void followProp() override;
     void backProp() override;
-
+public:
+    explicit LayerExp(Layer &left);
 };
 
 

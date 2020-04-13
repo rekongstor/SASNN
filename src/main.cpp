@@ -22,7 +22,7 @@ void TrainNN(NeuralNetwork &NN) {
     NN.ModifyParam('l', 0.0003f);
     NN.ModifyParam('r', 1.0f);
     NN.ModifyParam('a', 0.5f);
-    for (int i = 0; i < 80; ++i) {
+    for (int i = 0; i < 40; ++i) {
         auto[train_acc, val_acc] = NN.Train();
         printf("Accuracy Train/Validation: [%.4f]/[%.4f] Diff: %.4f\n", train_acc, val_acc, static_cast<f64>(train_acc) - val_acc);
     }
@@ -74,7 +74,7 @@ int main(int argc, const char *argv[]) {
     Dataset &dataset = datasetStandard;
     //dataset.PreprocessMean();
 
-    RegressionNN regressionNN(datasetStandard, 32, 32, 32, 32);
+    RegressionNN regressionNN(datasetStandard, 64, 64, 64, 64);
 
     {
         TrainNN(regressionNN);
