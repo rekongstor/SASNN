@@ -19,20 +19,22 @@ void DeserializeNN(NeuralNetwork &NN, const char *filename) {
 }
 
 void TrainNN(NeuralNetwork &NN) {
-    NN.ModifyParam('l', 0.0003f);
-    NN.ModifyParam('r', 1.0f);
+    //NN.ModifyParam('l', 0.0003f);
+    NN.ModifyParam('r', 1.0000f);
     NN.ModifyParam('a', 0.5f);
-    for (int i = 0; i < 40; ++i) {
+    for (int i = 0; i < 1; ++i) {
         auto[train_acc, val_acc] = NN.Train();
         printf("Accuracy Train/Validation: [%.4f]/[%.4f] Diff: %.4f\n", train_acc, val_acc, static_cast<f64>(train_acc) - val_acc);
     }
-    auto[val_acc, test_acc] = NN.Test();
-    printf("Accuracy Validation/Test: [%.4f]/[%.4f] Diff: %.4f\n", val_acc, test_acc, static_cast<f64>(val_acc) - test_acc);
-    NN.Serialize("SAS.NN");
 }
 
-void UseNN(NeuralNetwork &NN, Matrix2D &input, Matrix2D &out) {
-    NN.Use(input,out);
+void TestNN(NeuralNetwork &NN) {
+    auto[val_acc, test_acc] = NN.Test();
+    printf("Accuracy Validation/Test: [%.4f]/[%.4f] Diff: %.4f\n", val_acc, test_acc, static_cast<f64>(val_acc) - test_acc);
+}
+
+void UseNN(NeuralNetwork &NN) {
+    NN.Use();
 }
 
 int main(int argc, const char *argv[]) {
@@ -70,24 +72,35 @@ int main(int argc, const char *argv[]) {
             std::cout << "Invalid validation coef" << argv[3] << std::endl;
             return 4;
         }
-    DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
+    //DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
+    DatasetStandard datasetStandard("D:\\SASTEST", 1100, 1100, 1100);
     Dataset &dataset = datasetStandard;
     //dataset.PreprocessMean();
-
     RegressionNN regressionNN(datasetStandard, 64, 64, 64, 64);
 
     {
         TrainNN(regressionNN);
         SerializeNN(regressionNN, "SAS.NN");
+
+        TestNN(regressionNN);
+        for (int i = 0; i < 20; ++i) {
+            DeserializeNN(regressionNN, "SAS.NN");
+            TrainNN(regressionNN);
+            SerializeNN(regressionNN, "SAS.NN");
+        }
+        TestNN(regressionNN);
+        UseNN(regressionNN);
     }
+
+//    DatasetStandard datasetStandard1("D:\\SASTEST", 1, 5847, 2);
+//    //DatasetStandard datasetStandard1("D:\\SASTEST", 1100, 1100, 1100);
+//    Dataset &dataset1 = datasetStandard1;
+//
+//    RegressionNN regressionNN1(datasetStandard1, 64);
 //    {
-//        DeserializeNN(regressionNN, "SAS.NN");
-//        Matrix2D in(1, 6);
-//        f32 src[] = {0.11,0.69,0.29,0.10,-0.75,0.83};
-//        in.AssignData(src);
-//        Matrix2D out(1, 2);
-//        UseNN(regressionNN, in, out);
-//        std::cout << out(0,0);
+//        DeserializeNN(regressionNN1, "SAS.NN");
+//        TestNN(regressionNN1);
+//        UseNN(regressionNN1);
 //    }
 
     return 0;

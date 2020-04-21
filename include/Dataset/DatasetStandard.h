@@ -23,6 +23,7 @@ class DatasetStandard : public Dataset {
     std::pair<const Matrix2D &, const Matrix2D &> GetValidationSample(bool moveCursor) override;
     std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> GetValidationSamples() override;
     std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> GetTestSamples() override;
+    std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> GetTrainSamples() override;
     [[nodiscard]] size_t GetInputs() const override;
     [[nodiscard]] size_t GetOutputs() const override;
     [[nodiscard]] size_t GetBatchSize() const override;

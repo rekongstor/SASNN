@@ -17,6 +17,7 @@
 #include "../../include/Layer/Functional/LayerSum.h"
 #include "../../include/Layer/Functional/LayerClamp.h"
 #include "../../include/Layer/Functional/LayerBatchNormalization.h"
+#include "../../include/Layer/LayerDecorators/Initializer/InitializerZero.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerXavier.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerUniform.h"
 #include "../../include/Layer/LayerDecorators/GradientDescent/GradientDescentStochastic.h"
@@ -116,9 +117,19 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
         WeightLayers.push_back(Biases);
         auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
         // Batch Normalization
-        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, new GradientDescentAdam));
+        auto BN_Beta = ADD_LAYER(
+                new LayerWeights(1, 1,
+                                 new InitializerZero(),
+                                 new GradientDescentAdam)); // [1 x outputs]
+        auto BN_Gamma = ADD_LAYER(
+                new LayerWeights(1, 1,
+                                 new InitializerZero(),
+                                 new GradientDescentAdam)); // [1 x outputs]
+        WeightLayers.push_back(BN_Beta);
+        WeightLayers.push_back(BN_Gamma);
+        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Values));
         // ReLU
-        auto ReLU = ADD_LAYER(new LayerLeakyReLU(*BatchNormalization));
+        auto ReLU = ADD_LAYER(new LayerReLU(*BatchNormalization));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
         RegularizationLayers.push_back(L2Regularization);
         auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
@@ -151,7 +162,7 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     RegularizationLayers.push_back(L2RegularizationBias);
 
     // Setting Loss function
-    auto SoftMax = ADD_LAYER(new LayerClamp(*Neurons, 0.f, 1.f));
+    auto SoftMax = ADD_LAYER(new LayerClamp(*Neurons));
     auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*SoftMax, *Output));
     std::shared_ptr<Layer> Loss = Regression;
     for (auto &&RL : RegularizationLayers)
@@ -262,7 +273,7 @@ void RegressionNN::Serialize(const char *filename) {
     // f32 [data]
     u32 layers = WeightLayers.size();
     out.write((const char *) &layers, sizeof(u32));
-    for (auto&& p : WeightLayers) {
+    for (auto &&p : WeightLayers) {
         auto &L = *p;
         u32 r = L.getData().getRows();
         u32 c = L.getData().getCols();
@@ -282,7 +293,7 @@ void RegressionNN::Deserialize(const char *filename) {
     // f32 [data]
     u32 layers = WeightLayers.size();
     in.read((char *) &layers, sizeof(u32));
-    for (auto&& p : WeightLayers) {
+    for (auto &&p : WeightLayers) {
         auto &L = *p;
         u32 r = L.getData().getRows();
         u32 c = L.getData().getCols();
@@ -293,9 +304,35 @@ void RegressionNN::Deserialize(const char *filename) {
     }
 }
 
-void RegressionNN::Use(Matrix2D &in, Matrix2D &out) {
-    auto[Inputs, Outputs] = IO;
-    Inputs->assignData(&in);
-    ForwardPropagation();
-    out.setCell(0,0,AccuracyLayer.second->getData()(0,0));
+void RegressionNN::Use() {
+    std::ofstream data_occ("SASTEST_occ", std::ios::binary);
+    std::ofstream data_low("SASTEST_low", std::ios::binary);
+    std::ofstream data_mid("SASTEST_mid", std::ios::binary);
+    std::ofstream data_hig("SASTEST_hig", std::ios::binary);
+    auto func = [&](auto& inputs, int offset = 0){
+        for (size_t i = 0; i < inputs.size(); ++i) {
+            auto Inputs = IO.first;
+            Inputs->assignData(&inputs[i]);
+            ForwardPropagation(AccuracyLayer.second.get());
+            AccuracyLayer.first->followProp();
+            auto &predictions = AccuracyLayer.second->getData();
+            for (size_t j = offset; j < predictions.getRows(); ++j) {
+                data_occ.write((const char *) &predictions(j, 0), sizeof(f32)); // 1 output
+                data_low.write((const char *) &predictions(j, 1), sizeof(f32)); // 1 output
+                data_mid.write((const char *) &predictions(j, 2), sizeof(f32)); // 1 output
+                data_hig.write((const char *) &predictions(j, 3), sizeof(f32)); // 1 output
+            }
+        }};
+    {
+        auto[inputs, outputs] = DataSet.GetTrainSamples();
+        func(inputs, 4);
+    }
+    {
+        auto[inputs, outputs] = DataSet.GetValidationSamples();
+        func(inputs);
+    }
+    {
+        auto[inputs, outputs] = DataSet.GetTestSamples();
+        func(inputs);
+    }
 }

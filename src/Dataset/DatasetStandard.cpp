@@ -144,6 +144,10 @@ std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetS
     return {validation_inputs, validation_outputs};
 }
 
+std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> DatasetStandard::GetTrainSamples() {
+    return {train_inputs, train_outputs};
+}
+
 size_t DatasetStandard::GetInputs() const {
     return inputs;
 }

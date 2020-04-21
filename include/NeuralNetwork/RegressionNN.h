@@ -23,7 +23,7 @@ class RegressionNN : public NeuralNetwork {
     std::vector<std::shared_ptr<Layer>> WeightLayers;
     void Deserialize(const char *filename) override;
     void Serialize(const char *filename) override;
-    void Use(Matrix2D &in, Matrix2D &out) override;
+    void Use() override;
 
     explicit RegressionNN(std::vector<s32> &&layers, Dataset &dataset);
     f32 GetAccuracy(std::pair<const std::vector<Matrix2D> &, const std::vector<Matrix2D> &> samples);

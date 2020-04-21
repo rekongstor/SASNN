@@ -11,7 +11,7 @@ public:
     virtual void Serialize(const char *filename) = 0;
     virtual void Deserialize(const char *filename) = 0;
     virtual void ModifyParam(char param_name, f32 value) = 0;
-    virtual void Use(Matrix2D &in, Matrix2D& out) = 0;
+    virtual void Use() = 0;
     virtual ~NeuralNetwork() = default;
 };
 

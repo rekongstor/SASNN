@@ -264,6 +264,6 @@ void ClassificationNN::Deserialize(const char *) {
 
 }
 
-void ClassificationNN::Use(Matrix2D &in, Matrix2D &out) {
+void ClassificationNN::Use() {
 
 }

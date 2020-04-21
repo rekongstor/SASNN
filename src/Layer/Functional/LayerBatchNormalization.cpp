@@ -96,7 +96,7 @@ void LayerBatchNormalization::backProp() {
     }
 }
 
-LayerBatchNormalization::LayerBatchNormalization(Layer &left, DecoratorGradientDescent *decoratorGradientDescent, bool rowOriented, f32 g, f32 b) :
+LayerBatchNormalization::LayerBatchNormalization(Layer &left, Layer& beta, Layer& gamma, bool rowOriented, f32 g, f32 b) :
         LayerDynamic(left.getData().getRows(), left.getData().getCols()),
         left(left),
         xb(left.getData().getRows(), left.getData().getCols()),
@@ -105,13 +105,12 @@ LayerBatchNormalization::LayerBatchNormalization(Layer &left, DecoratorGradientD
         d_mean(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         variance(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         d_variance(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
-        gamma(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
+        gamma(gamma.getData()),
         d_gamma(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         beta(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         d_beta(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         size(1, 1),
-        RowOriented(rowOriented),
-        gradientDescent(decoratorGradientDescent) {
+        RowOriented(rowOriented) {
     gamma.Fill(g);
     beta.Fill(b);
     size.Fill(static_cast<f32>(RowOriented ? left.getData().getRows() : left.getData().getCols()));
