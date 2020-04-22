@@ -15,6 +15,8 @@
 #include "../../include/Layer/Functional/LayerSum.h"
 #include "../../include/Layer/Functional/LayerBatchNormalization.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerXavier.h"
+#include "../../include/Layer/LayerDecorators/Initializer/InitializerZero.h"
+#include "../../include/Layer/LayerDecorators/Initializer/InitializerUniform.h"
 #include "../../include/Layer/LayerDecorators/GradientDescent/GradientDescentStochastic.h"
 #include "../../include/Layer/LayerDecorators/GradientDescent/GradientDescentMomentum.h"
 #include "../../include/Layer/LayerDecorators/GradientDescent/GradientDescentAdaGrad.h"
@@ -112,7 +114,17 @@ ClassificationNN::ClassificationNN(std::vector<s32> &&layers, Dataset &dataset) 
         WeightLayers.push_back(Biases);
         auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
         // Batch Normalization
-        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, new GradientDescentAdam));
+        auto BN_Beta = ADD_LAYER(
+                new LayerWeights(1, 1,
+                                 new InitializerZero(),
+                                 new GradientDescentAdam)); // [1 x outputs]
+        auto BN_Gamma = ADD_LAYER(
+                new LayerWeights(1, 1,
+                                 new InitializerUniform(1.f,1.f),
+                                 new GradientDescentAdam)); // [1 x outputs]
+        WeightLayers.push_back(BN_Beta);
+        WeightLayers.push_back(BN_Gamma);
+        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Beta, *BN_Gamma));
         // ReLU
         auto ReLU = ADD_LAYER(new LayerLeakyReLU(*BatchNormalization));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));

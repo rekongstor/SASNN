@@ -72,8 +72,8 @@ int main(int argc, const char *argv[]) {
             std::cout << "Invalid validation coef" << argv[3] << std::endl;
             return 4;
         }
-    //DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    DatasetStandard datasetStandard("D:\\SASTEST", 1100, 1100, 1100);
+    DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
+    //DatasetStandard datasetStandard("D:\\SASTEST", 1100, 1100, 1100);
     Dataset &dataset = datasetStandard;
     //dataset.PreprocessMean();
     RegressionNN regressionNN(datasetStandard, 64, 64, 64, 64);
@@ -89,19 +89,19 @@ int main(int argc, const char *argv[]) {
             SerializeNN(regressionNN, "SAS.NN");
         }
         TestNN(regressionNN);
-        UseNN(regressionNN);
+        //UseNN(regressionNN);
     }
 
-//    DatasetStandard datasetStandard1("D:\\SASTEST", 1, 5847, 2);
-//    //DatasetStandard datasetStandard1("D:\\SASTEST", 1100, 1100, 1100);
-//    Dataset &dataset1 = datasetStandard1;
-//
-//    RegressionNN regressionNN1(datasetStandard1, 64);
-//    {
-//        DeserializeNN(regressionNN1, "SAS.NN");
-//        TestNN(regressionNN1);
-//        UseNN(regressionNN1);
-//    }
+    DatasetStandard datasetStandard1("D:\\SASTEST", 1, 5847, 2);
+    //DatasetStandard datasetStandard1("D:\\SASTEST", 1100, 1100, 1100);
+    Dataset &dataset1 = datasetStandard1;
+
+    RegressionNN regressionNN1(datasetStandard1, 64, 64, 64, 64);
+    {
+        DeserializeNN(regressionNN1, "SAS.NN");
+        TestNN(regressionNN1);
+        UseNN(regressionNN1);
+    }
 
     return 0;
 }

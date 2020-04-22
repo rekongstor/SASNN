@@ -6,6 +6,8 @@
 void LayerBatchNormalization::followProp() {
     auto Merge_functor = RowOriented ? &Matrix2D::MergeRowsOperator : &Matrix2D::MergeColsOperator;
     auto Data_functor = RowOriented ? &Matrix2D::RowOperator : &Matrix2D::ColOperator;
+    const Matrix2D& gamma = this->gamma.getData();
+    const Matrix2D& beta = this->gamma.getData();
 
     // calculating mean
     (mean.*Merge_functor)(left.getData(), [](const f32 l, const f32 r) -> f32 {
@@ -42,6 +44,11 @@ void LayerBatchNormalization::followProp() {
 
 void LayerBatchNormalization::backProp() {
     if (left.getGrad() != nullptr) {
+        const Matrix2D& gamma = this->gamma.getData();
+        Matrix2D& d_gamma = *this->gamma.getGrad();
+        const Matrix2D& beta = this->gamma.getData();
+        Matrix2D& d_beta = *this->gamma.getGrad();
+
         Matrix2D &g = *left.getGrad();
         auto Merge_functor = RowOriented ? &Matrix2D::MergeRowsOperator : &Matrix2D::MergeColsOperator;
         // dxb
@@ -105,18 +112,20 @@ LayerBatchNormalization::LayerBatchNormalization(Layer &left, Layer& beta, Layer
         d_mean(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         variance(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         d_variance(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
-        gamma(gamma.getData()),
-        d_gamma(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
-        beta(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
-        d_beta(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
+//        gamma(gamma.getData()),
+//        d_gamma(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
+//        beta(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
+//        d_beta(rowOriented ? 1 : left.getData().getRows(), rowOriented ? left.getData().getCols() : 1),
         size(1, 1),
+        gamma(gamma),
+        beta(beta),
         RowOriented(rowOriented) {
-    gamma.Fill(g);
-    beta.Fill(b);
+//    gamma.Fill(g);
+//    beta.Fill(b);
     size.Fill(static_cast<f32>(RowOriented ? left.getData().getRows() : left.getData().getCols()));
 }
 
 void LayerBatchNormalization::subGrad(f32 step) {
-    gradientDescent->subGrad(gamma, d_gamma, step);
-    gradientDescent->subGrad(beta, d_beta, step);
+//    gradientDescent->subGrad(gamma, d_gamma, step);
+//    gradientDescent->subGrad(beta, d_beta, step);
 }

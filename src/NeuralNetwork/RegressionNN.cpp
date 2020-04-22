@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include "../../include/NeuralNetwork/RegressionNN.h"
 #include "../../include/Layer/Simple/LayerWeights.h"
 #include "../../include/Layer/Simple/LayerData.h"
@@ -123,13 +124,13 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
                                  new GradientDescentAdam)); // [1 x outputs]
         auto BN_Gamma = ADD_LAYER(
                 new LayerWeights(1, 1,
-                                 new InitializerZero(),
+                                 new InitializerUniform(1.f, 1.f),
                                  new GradientDescentAdam)); // [1 x outputs]
         WeightLayers.push_back(BN_Beta);
         WeightLayers.push_back(BN_Gamma);
-        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Values));
+        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Beta, *BN_Gamma));
         // ReLU
-        auto ReLU = ADD_LAYER(new LayerReLU(*BatchNormalization));
+        auto ReLU = ADD_LAYER(new LayerReLU(*Neurons));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
         RegularizationLayers.push_back(L2Regularization);
         auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
@@ -305,16 +306,20 @@ void RegressionNN::Deserialize(const char *filename) {
 }
 
 void RegressionNN::Use() {
+    long time = 0;
     std::ofstream data_occ("SASTEST_occ", std::ios::binary);
     std::ofstream data_low("SASTEST_low", std::ios::binary);
     std::ofstream data_mid("SASTEST_mid", std::ios::binary);
     std::ofstream data_hig("SASTEST_hig", std::ios::binary);
-    auto func = [&](auto& inputs, int offset = 0){
+    auto func = [&](auto &inputs, int offset = 0) {
         for (size_t i = 0; i < inputs.size(); ++i) {
+            auto start = std::chrono::high_resolution_clock::now();
             auto Inputs = IO.first;
             Inputs->assignData(&inputs[i]);
             ForwardPropagation(AccuracyLayer.second.get());
             AccuracyLayer.first->followProp();
+            auto end = std::chrono::high_resolution_clock::now();
+            time += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
             auto &predictions = AccuracyLayer.second->getData();
             for (size_t j = offset; j < predictions.getRows(); ++j) {
                 data_occ.write((const char *) &predictions(j, 0), sizeof(f32)); // 1 output
@@ -322,7 +327,8 @@ void RegressionNN::Use() {
                 data_mid.write((const char *) &predictions(j, 2), sizeof(f32)); // 1 output
                 data_hig.write((const char *) &predictions(j, 3), sizeof(f32)); // 1 output
             }
-        }};
+        }
+    };
     {
         auto[inputs, outputs] = DataSet.GetTrainSamples();
         func(inputs, 4);
@@ -335,4 +341,5 @@ void RegressionNN::Use() {
         auto[inputs, outputs] = DataSet.GetTestSamples();
         func(inputs);
     }
+    std::cout << "Total time: " << time << std::endl;
 }
