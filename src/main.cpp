@@ -20,7 +20,7 @@ void DeserializeNN(NeuralNetwork &NN, const char *filename) {
 
 void TrainNN(NeuralNetwork &NN) {
     //NN.ModifyParam('l', 0.0003f);
-    NN.ModifyParam('r', 1.0000f);
+    NN.ModifyParam('r', 0.0000f);
     NN.ModifyParam('a', 0.5f);
     for (int i = 0; i < 1; ++i) {
         auto[train_acc, val_acc] = NN.Train();
@@ -79,10 +79,9 @@ int main(int argc, const char *argv[]) {
     RegressionNN regressionNN(datasetStandard, 64, 64, 64, 64);
 
     {
-        TrainNN(regressionNN);
-        SerializeNN(regressionNN, "SAS.NN");
+//        TrainNN(regressionNN);
+//        SerializeNN(regressionNN, "SAS.NN");
 
-        TestNN(regressionNN);
         for (int i = 0; i < 20; ++i) {
             DeserializeNN(regressionNN, "SAS.NN");
             TrainNN(regressionNN);

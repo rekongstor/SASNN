@@ -15,6 +15,7 @@
 #include "../../include/Layer/NLF/LayerReLU.h"
 #include "../../include/Layer/NLF/LayerTanh.h"
 #include "../../include/Layer/NLF/LayerSigmoid.h"
+#include "../../include/Layer/NLF/LayerSigmoidParametric.h"
 #include "../../include/Layer/Functional/LayerSum.h"
 #include "../../include/Layer/Resulting/LayerClamp.h"
 #include "../../include/Layer/Functional/LayerBatchNormalization.h"
@@ -121,21 +122,16 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
         auto BN_Beta = ADD_LAYER(
                 new LayerWeights(1, 1,
                                  new InitializerZero(),
-                                 new GradientDescentAdam)); // [1 x outputs]
+                                 new GradientDescentAdam)); // [1 x 1]
         auto BN_Gamma = ADD_LAYER(
                 new LayerWeights(1, 1,
                                  new InitializerUniform(1.f, 1.f),
-                                 new GradientDescentAdam)); // [1 x outputs]
+                                 new GradientDescentAdam)); // [1 x 1]
         WeightLayers.push_back(BN_Beta);
         WeightLayers.push_back(BN_Gamma);
         auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Beta, *BN_Gamma));
         // ReLU
-        auto SigmoidParam = ADD_LAYER(
-                new LayerWeights(1, 1,
-                                 new InitializerUniform(1.f, 1.f),
-                                 new GradientDescentAdam)); // [1 x outputs]
-        WeightLayers.push_back(SigmoidParam);
-        auto ReLU = ADD_LAYER(new LayerReLU(*Neurons));
+        auto ReLU = ADD_LAYER(new LayerLeakyReLU(*Neurons));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
         RegularizationLayers.push_back(L2Regularization);
         auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
@@ -163,6 +159,11 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     RegularizationLayers.push_back(L2RegularizationBias);
 
     // Setting Loss function
+//    auto SigmoidParam = ADD_LAYER(
+//            new LayerWeights(1, static_cast<size_t>(dataset.GetOutputs()),
+//                             new InitializerUniform(0.f, 1.f),
+//                             new GradientDescentAdam)); // [1 x outputs]
+//    WeightLayers.push_back(SigmoidParam);
     auto SoftMax = ADD_LAYER(new LayerSigmoid(*Neurons));
     auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*SoftMax, *Output));
     std::shared_ptr<Layer> Loss = Regression;
