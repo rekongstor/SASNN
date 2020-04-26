@@ -1,5 +1,5 @@
 #include <cmath>
-#include "../../../include/Layer/Functional/LayerSoftMax.h"
+#include "../../../include/Layer/Resulting/LayerSoftMax.h"
 
 void LayerSoftMax::followProp() {
     auto Merge_functor = RowOriented ? &Matrix2D::MergeColsOperator : &Matrix2D::MergeRowsOperator;

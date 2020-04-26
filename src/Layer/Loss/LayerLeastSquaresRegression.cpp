@@ -1,4 +1,4 @@
-#include "../../../include/Layer/Functional/LayerLeastSquaresRegression.h"
+#include "../../../include/Layer/Loss/LayerLeastSquaresRegression.h"
 
 void LayerLeastSquaresRegression::followProp() {
     SquaredDiff.EachCellOperator(left.getData(), right.getData(), [](const f32 l, const f32 r) -> f32 {

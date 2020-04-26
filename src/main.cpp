@@ -89,7 +89,6 @@ int main(int argc, const char *argv[]) {
             SerializeNN(regressionNN, "SAS.NN");
         }
         TestNN(regressionNN);
-        //UseNN(regressionNN);
     }
 
     DatasetStandard datasetStandard1("D:\\SASTEST", 1, 5847, 2);

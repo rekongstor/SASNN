@@ -1,4 +1,4 @@
-#include "../../../include/Layer/Functional/LayerCrossEntropyLoss.h"
+#include "../../../include/Layer/Loss/LayerCrossEntropyLoss.h"
 #include <cmath>
 
 void LayerCrossEntropyLoss::followProp() {

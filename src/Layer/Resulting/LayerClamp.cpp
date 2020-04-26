@@ -1,4 +1,4 @@
-#include "../../../include/Layer/Functional/LayerClamp.h"
+#include "../../../include/Layer/Resulting/LayerClamp.h"
 
 void LayerClamp::followProp() {
     data.EachCellOperator(left.getData(), lower_bound, upper_bound, [](const f32 l, const f32 low, const f32 up) -> f32 {

@@ -4,11 +4,11 @@
 #include "../../include/NeuralNetwork/RegressionNN.h"
 #include "../../include/Layer/Simple/LayerWeights.h"
 #include "../../include/Layer/Simple/LayerData.h"
-#include "../../include/Layer/Functional/LayerStableSoftMax.h"
-#include "../../include/Layer/Functional/LayerCrossEntropyLoss.h"
+#include "../../include/Layer/Resulting/LayerStableSoftMax.h"
+#include "../../include/Layer/Loss/LayerCrossEntropyLoss.h"
 #include "../../include/Layer/Functional/LayerFullyConnected.h"
 #include "../../include/Layer/Functional/LayerL2Reg.h"
-#include "../../include/Layer/Functional/LayerLeastSquaresRegression.h"
+#include "../../include/Layer/Loss/LayerLeastSquaresRegression.h"
 #include "../../include/Layer/Accuracy/LayerClassificationAccuracy.h"
 #include "../../include/Layer/Accuracy/LayerRegressionAccuracy.h"
 #include "../../include/Layer/NLF/LayerLeakyReLU.h"
@@ -16,7 +16,7 @@
 #include "../../include/Layer/NLF/LayerTanh.h"
 #include "../../include/Layer/NLF/LayerSigmoid.h"
 #include "../../include/Layer/Functional/LayerSum.h"
-#include "../../include/Layer/Functional/LayerClamp.h"
+#include "../../include/Layer/Resulting/LayerClamp.h"
 #include "../../include/Layer/Functional/LayerBatchNormalization.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerZero.h"
 #include "../../include/Layer/LayerDecorators/Initializer/InitializerXavier.h"
@@ -130,6 +130,11 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
         WeightLayers.push_back(BN_Gamma);
         auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Beta, *BN_Gamma));
         // ReLU
+        auto SigmoidParam = ADD_LAYER(
+                new LayerWeights(1, 1,
+                                 new InitializerUniform(1.f, 1.f),
+                                 new GradientDescentAdam)); // [1 x outputs]
+        WeightLayers.push_back(SigmoidParam);
         auto ReLU = ADD_LAYER(new LayerReLU(*Neurons));
         auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
         RegularizationLayers.push_back(L2Regularization);
@@ -137,12 +142,7 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
         RegularizationLayers.push_back(L2RegularizationBias);
         InputNeurons = ReLU;
     }
-// 32х32 1024 х 0;1
-// 0 0 0 0 0 0 0 0 0 0 1
-// 6 х [-1;1]
-// 4 x [0;1]
-// p1 0;1  p2 0;1; p1 = 1 - p2
-    // Classification Layer
+    // Resulting Layer
     auto Weights = ADD_LAYER(
             new LayerWeights(InputNeurons->getData().getCols(), dataset.GetOutputs(),
                              new InitializerXavier(static_cast<f32>(InputNeurons->getData().getCols())),
@@ -163,7 +163,7 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     RegularizationLayers.push_back(L2RegularizationBias);
 
     // Setting Loss function
-    auto SoftMax = ADD_LAYER(new LayerClamp(*Neurons));
+    auto SoftMax = ADD_LAYER(new LayerSigmoid(*Neurons));
     auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*SoftMax, *Output));
     std::shared_ptr<Layer> Loss = Regression;
     for (auto &&RL : RegularizationLayers)
