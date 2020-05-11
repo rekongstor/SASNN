@@ -17,7 +17,7 @@ void LayerSigmoidParametric::backProp() {
     if (right.getGrad() != nullptr) {
         Matrix2D &g = *right.getGrad();
         g.EachCellOperator(data, left.getData(), [](const f32 l, const f32 r) -> f32 {
-            return l * (1 - l) * r * 0.001f;
+            return l * (1 - l) * r;
         }, &grad);
     }
 }

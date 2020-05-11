@@ -20,7 +20,7 @@ void DeserializeNN(NeuralNetwork &NN, const char *filename) {
 
 void TrainNN(NeuralNetwork &NN) {
     //NN.ModifyParam('l', 0.0003f);
-    NN.ModifyParam('r', 0.0000f);
+    NN.ModifyParam('r', 10.0001f);
     NN.ModifyParam('a', 0.5f);
     for (int i = 0; i < 1; ++i) {
         auto[train_acc, val_acc] = NN.Train();
@@ -72,29 +72,47 @@ int main(int argc, const char *argv[]) {
             std::cout << "Invalid validation coef" << argv[3] << std::endl;
             return 4;
         }
-    DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
-    //DatasetStandard datasetStandard("D:\\SASTEST", 1100, 1100, 1100);
-    Dataset &dataset = datasetStandard;
-    //dataset.PreprocessMean();
-    RegressionNN regressionNN(datasetStandard, 64, 64, 64, 64);
+#define architecture 64,64,64
 
     {
-//        TrainNN(regressionNN);
-//        SerializeNN(regressionNN, "SAS.NN");
+        DatasetStandard datasetStandard(fileName, batchSize, testCoef, validationCoef);
+        RegressionNN regressionNN(datasetStandard, architecture);
+        TrainNN(regressionNN);
+        SerializeNN(regressionNN, "SAS.NN");
 
-        for (int i = 0; i < 20; ++i) {
+        for (int i = 0; i < 40; ++i) {
             DeserializeNN(regressionNN, "SAS.NN");
             TrainNN(regressionNN);
             SerializeNN(regressionNN, "SAS.NN");
         }
-        TestNN(regressionNN);
     }
+    {
+        DatasetStandard datasetStandard(fileName, batchSize * 5, testCoef, validationCoef);
+        RegressionNN regressionNN(datasetStandard, architecture);
+
+        for (int i = 0; i < 10; ++i) {
+            DeserializeNN(regressionNN, "SAS.NN");
+            TrainNN(regressionNN);
+            SerializeNN(regressionNN, "SAS.NN");
+        }
+    }
+//    {
+//        DatasetStandard datasetStandard(fileName, batchSize*20, testCoef, validationCoef);
+//        RegressionNN regressionNN(datasetStandard, architecture);
+//
+//        for (int i = 0; i < 10; ++i) {
+//            DeserializeNN(regressionNN, "SAS.NN");
+//            TrainNN(regressionNN);
+//            SerializeNN(regressionNN, "SAS.NN");
+//        }
+//        TestNN(regressionNN);
+//    }
 
     DatasetStandard datasetStandard1("D:\\SASTEST", 1, 5847, 2);
     //DatasetStandard datasetStandard1("D:\\SASTEST", 1100, 1100, 1100);
     Dataset &dataset1 = datasetStandard1;
 
-    RegressionNN regressionNN1(datasetStandard1, 64, 64, 64, 64);
+    RegressionNN regressionNN1(datasetStandard1, architecture);
     {
         DeserializeNN(regressionNN1, "SAS.NN");
         TestNN(regressionNN1);

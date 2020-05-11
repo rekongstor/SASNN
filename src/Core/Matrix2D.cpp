@@ -60,7 +60,6 @@ void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, f32
                 (*this).setCell(i, j, functor(left(i, j), right(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
-
 void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, const Matrix2D &extra, f32 (*functor)(const f32, const f32, const f32), const Matrix2D *multiplier) {
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
@@ -76,9 +75,20 @@ void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, con
     for (size_t i = 0; i < rows; ++i)
         for (size_t j = 0; j < cols; ++j)
             if (incremental)
-                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j), extra(i, j), tetra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j), extra(i, j), tetra(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
             else
-                (*this).setCell(i, j, functor(left(i, j), right(i, j), extra(i, j), tetra(i,j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+                (*this).setCell(i, j, functor(left(i, j), right(i, j), extra(i, j), tetra(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+}
+
+void Matrix2D::EachCellOperator(const Matrix2D &left, const Matrix2D &right, const Matrix2D &extra, const Matrix2D &tetra, const Matrix2D &penta, f32 (*functor)
+        (const f32, const f32, const f32, const f32, const f32),
+                                const Matrix2D *multiplier) {
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            if (incremental)
+                (*this).setCell(i, j, (*this)(i, j) + functor(left(i, j), right(i, j), extra(i, j), tetra(i, j), penta(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
+            else
+                (*this).setCell(i, j, functor(left(i, j), right(i, j), extra(i, j), tetra(i, j), penta(i, j)) * (multiplier == nullptr ? 1.f : (*multiplier)(i, j)));
 }
 
 void Matrix2D::RowOperator(const Matrix2D &left, const Matrix2D &right, f32 (*functor)(const f32, const f32), const Matrix2D *multiplier) {
@@ -167,16 +177,15 @@ void Matrix2D::MultiplyOperator(const Matrix2D &left, const Matrix2D &right) {
     s64 i_max = static_cast<s64>(left.getRows());
     s64 j_max = static_cast<s64>(right.getCols());
     s64 k_max = static_cast<s64>(left.getCols());
-#pragma omp parallel for default (none) shared(i_max, j_max, k_max, left, right)
+    f32 tmp;
+    if (!incremental)
+        this->Clean();
+#pragma omp parallel for default (none) shared(i_max, j_max, k_max, left, right) private(tmp)
     for (s64 i = 0; i < static_cast<size_t>(i_max); ++i) {
-        for (size_t j = 0; j < static_cast<size_t>(j_max); ++j) {
-            f32 tmp = 0.f;
-            for (size_t k = 0; k < static_cast<size_t>(k_max); ++k)
-                tmp += left(static_cast<size_t>(i), k) * right(k, j);
-            if (incremental)
-                (*this).setCell(static_cast<size_t>(i), j, (*this)(static_cast<size_t>(i), j) + tmp);
-            else
-                (*this).setCell(static_cast<size_t>(i), j, tmp);
+        for (size_t k = 0; k < static_cast<size_t>(k_max); ++k) {
+            tmp = left(i, k);
+            for (size_t j = 0; j < static_cast<size_t>(j_max); ++j)
+                (*this).setCell(static_cast<size_t>(i), j, (*this)(static_cast<size_t>(i), j) + tmp * right(k, j));
         }
     }
 }

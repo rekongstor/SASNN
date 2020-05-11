@@ -87,8 +87,8 @@ void RegressionNN::AdaptLearningRate() {
 
 RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSet(dataset) {
     // Setting hyper-parameters. Modifiable
-    ADD_PARAM('l', 0.0003f); // Learning rate
-    ADD_PARAM('r', 1.f); // Regularization
+    ADD_PARAM('l', 0.005f); // Learning rate
+    ADD_PARAM('r', 0.f); // Regularization
     ADD_PARAM('s', 50.f); // Steps
     ADD_PARAM('a', 0.5f); // Annealing multiplier
     annealLossValues.resize(static_cast<size_t>(std::round(GET_PARAM('s'))));
@@ -117,25 +117,31 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
                                  new GradientDescentAdam)); // [1 x outputs]
         WeightLayers.push_back(Weights);
         WeightLayers.push_back(Biases);
+//        auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
+//        RegularizationLayers.push_back(L2Regularization);
+//        auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
+//        RegularizationLayers.push_back(L2RegularizationBias);
         auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases));
         // Batch Normalization
-        auto BN_Beta = ADD_LAYER(
-                new LayerWeights(1, 1,
-                                 new InitializerZero(),
-                                 new GradientDescentAdam)); // [1 x 1]
-        auto BN_Gamma = ADD_LAYER(
-                new LayerWeights(1, 1,
-                                 new InitializerUniform(1.f, 1.f),
-                                 new GradientDescentAdam)); // [1 x 1]
-        WeightLayers.push_back(BN_Beta);
-        WeightLayers.push_back(BN_Gamma);
-        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Beta, *BN_Gamma));
+//        auto BN_Beta = ADD_LAYER(
+//                new LayerWeights(1, 1,
+//                                 new InitializerZero(),
+//                                 new GradientDescentAdam)); // [1 x 1]
+//        auto BN_Gamma = ADD_LAYER(
+//                new LayerWeights(1, 1,
+//                                 new InitializerUniform(1.f, 1.f),
+//                                 new GradientDescentAdam)); // [1 x 1]
+//        WeightLayers.push_back(BN_Beta);
+//        WeightLayers.push_back(BN_Gamma);
+//        auto L2RegularizationBeta = ADD_LAYER(new LayerL2Reg(*BN_Beta, *L2RegParam));
+//        RegularizationLayers.push_back(L2RegularizationBeta);
+//        auto L2RegularizationGamma = ADD_LAYER(new LayerL2Reg(*BN_Gamma, *L2RegParam));
+//        RegularizationLayers.push_back(L2RegularizationGamma);
+//        auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Beta, *BN_Gamma));
         // ReLU
         auto ReLU = ADD_LAYER(new LayerLeakyReLU(*Neurons));
-        auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
-        RegularizationLayers.push_back(L2Regularization);
-        auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
-        RegularizationLayers.push_back(L2RegularizationBias);
+
+
         InputNeurons = ReLU;
     }
     // Resulting Layer
@@ -151,21 +157,39 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
                              new GradientDescentAdam)); // [1 x outputs]
     WeightLayers.push_back(Weights);
     WeightLayers.push_back(Biases);
+//    auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
+//    RegularizationLayers.push_back(L2Regularization);
+//    auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
+//    RegularizationLayers.push_back(L2RegularizationBias);
     auto Neurons = ADD_LAYER(new LayerSum(*FullyConnected, *Biases)); // 4: -inf +inf; Sigmoid (0;+1)
 
-    auto L2Regularization = ADD_LAYER(new LayerL2Reg(*Weights, *L2RegParam));
-    RegularizationLayers.push_back(L2Regularization);
-    auto L2RegularizationBias = ADD_LAYER(new LayerL2Reg(*Biases, *L2RegParam));
-    RegularizationLayers.push_back(L2RegularizationBias);
+    // Batch Normalization
+//    auto BN_Beta = ADD_LAYER(
+//            new LayerWeights(1, 1,
+//                             new InitializerZero(),
+//                             new GradientDescentAdam)); // [1 x 1]
+//    auto BN_Gamma = ADD_LAYER(
+//            new LayerWeights(1, 1,
+//                             new InitializerUniform(1.f, 1.f),
+//                             new GradientDescentAdam)); // [1 x 1]
+//    WeightLayers.push_back(BN_Beta);
+//    WeightLayers.push_back(BN_Gamma);
+//    auto L2RegularizationBeta = ADD_LAYER(new LayerL2Reg(*BN_Beta, *L2RegParam));
+//    RegularizationLayers.push_back(L2RegularizationBeta);
+//    auto L2RegularizationGamma = ADD_LAYER(new LayerL2Reg(*BN_Gamma, *L2RegParam));
+//    RegularizationLayers.push_back(L2RegularizationGamma);
+//    auto BatchNormalization = ADD_LAYER(new LayerBatchNormalization(*Neurons, *BN_Beta, *BN_Gamma));
 
-    // Setting Loss function
+
+//     Setting Loss function
 //    auto SigmoidParam = ADD_LAYER(
 //            new LayerWeights(1, static_cast<size_t>(dataset.GetOutputs()),
 //                             new InitializerUniform(0.f, 1.f),
 //                             new GradientDescentAdam)); // [1 x outputs]
 //    WeightLayers.push_back(SigmoidParam);
-    auto SoftMax = ADD_LAYER(new LayerSigmoid(*Neurons));
-    auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*SoftMax, *Output));
+
+    auto OutputLayer = ADD_LAYER(new LayerSigmoid(*Neurons));
+    auto Regression = ADD_LAYER(new LayerLeastSquaresRegression(*OutputLayer, *Output));
     std::shared_ptr<Layer> Loss = Regression;
     for (auto &&RL : RegularizationLayers)
         Loss = ADD_LAYER(new LayerSum(*Loss, *RL.get()));
@@ -173,7 +197,7 @@ RegressionNN::RegressionNN(std::vector<s32> &&layers, Dataset &dataset) : DataSe
     LossFunction = Loss;
 
     // Setting Accuracy layer
-    AccuracyLayer = {std::dynamic_pointer_cast<Layer>(std::make_shared<LayerRegressionAccuracy>(*SoftMax, *Output, true)), SoftMax};
+    AccuracyLayer = {std::dynamic_pointer_cast<Layer>(std::make_shared<LayerRegressionAccuracy>(*OutputLayer, *Output, true)), OutputLayer};
 }
 
 void RegressionNN::ModifyParam(char param_name, f32 value) {
