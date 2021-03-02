@@ -31,6 +31,9 @@ std::pair<f32, f32> ClassificationNN::Test() {
 }
 
 std::pair<f32, f32> ClassificationNN::Train() {
+    f32 trainAcc = GetAccuracy(DataSet.GetTrainSample(false));
+    f32 valAcc = GetAccuracy(DataSet.GetValidationSample(true));
+
     for (u64 i = 0; i < std::round(GET_PARAM('s')); ++i) {
         // Load next batch
         auto[Inputs, Outputs] = IO;
@@ -45,9 +48,6 @@ std::pair<f32, f32> ClassificationNN::Train() {
         annealLossValues[i] = LossFunction->getData()(0, 0);
     }
     AdaptLearningRate();
-
-    f32 trainAcc = GetAccuracy(DataSet.GetTrainSample(false));
-    f32 valAcc = GetAccuracy(DataSet.GetValidationSample(true));
 
 
     return {trainAcc, valAcc};
